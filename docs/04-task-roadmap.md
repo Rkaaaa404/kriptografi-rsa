@@ -1,10 +1,11 @@
 # Task Breakdown & Implementation Roadmap
 ## Proyek: SecurePass RSA — Sistem Otorisasi & Verifikasi Surat Jalan Pabrik
 
-- **Dokumen Terkait**: [PRD (Product Requirements Document)](./PRD_RSA_Warehouse_GatePass.md) | [System Design & Architecture](./design.md)
+- **Dokumen Terkait**: [PRD](./02-prd-securepass-rsa.md) | [System Design & Architecture](./03-technical-design.md)
 - **Target Deadline**: 21 Oktober 2024, pukul 10.00 WIB
-- **Tech Stack**: Python 3.11+, Streamlit / CustomTkinter (GUI), 0% Library Kriptografi Eksternal (Pure Python Implementation)
-
+- **Tech Stack**:
+  - **Backend**: Python 3.11+, **FastAPI**, `uvicorn`, `pydantic` (0% Library Kriptografi Eksternal)
+  - **Frontend**: **Next.js (App Router)**, **TypeScript**, **TanStack Query** (`@tanstack/react-query` untuk Client-Side Fetching / CSF & state caching), **Tailwind CSS**
 ---
 
 ## 1. Status Board & Ringkasan Task
@@ -23,35 +24,41 @@
 | `TASK-1.9` | Implementasi `inspector.py` (Trace Logger Miller-Rabin, EEA, ModExp) | Anggota 1 | 🟡 Med | ☐ Todo | 5h |
 | `TASK-1.10` | Unit Test Manual & Verifikasi Contoh Kuliah ($p=47, q=71, e=79$) | Anggota 1 | 🟡 Med | ☐ Todo | 2h |
 
-### Anggota 2: Security Protocol & Engine
+### 🔒 ROLE 2 — Security Protocol & FastAPI Backend Specialist (Anggota 2)
+* **Fokus Utama**: Protokol keamanan data, hashing manual, blocking/chunking, digital signature, enkripsi payload, serialisasi token, anti-replay, serta pembuatan endpoint REST API **FastAPI**.
+* **File Kepemilikan**: `backend/core/hashing.py`, `backend/core/rsa_engine.py`, `backend/models/schemas.py`, `backend/routers/*.py`.
+
 | ID | Task | Assignee | Priority | Status | Est. Jam |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| `TASK-2.1` | Implementasi `custom_hash(data_str)` Polynomial Rolling Hash | Anggota 2 | 🔴 High | ☐ Todo | 3h |
-| `TASK-2.2` | Implementasi Chunking `text_to_blocks()` & `blocks_to_text()` | Anggota 2 | 🔴 High | ☐ Todo | 4h |
-| `TASK-2.3` | Implementasi `rsa_encrypt()` & `rsa_decrypt()` Core Engine | Anggota 2 | 🔴 High | ☐ Todo | 3h |
-| `TASK-2.4` | Implementasi `sign(manifest_str, priv_key_A)` Digital Signature | Anggota 2 | 🔴 High | ☐ Todo | 3h |
-| `TASK-2.5` | Implementasi `verify(manifest_str, signature_blocks, pub_key_A)` | Anggota 2 | 🔴 High | ☐ Todo | 3h |
-| `TASK-2.6` | Implementasi `counter_sign(clearance_str, priv_key_B)` Satpam | Anggota 2 | 🔴 High | ☐ Todo | 2h |
-| `TASK-2.7` | Implementasi `encrypt_payload()` & `decrypt_payload()` PrivKey/PubKey C | Anggota 2 | 🔴 High | ☐ Todo | 3h |
-| `TASK-2.8` | Implementasi `serialize_token(gate_pass_obj)` (JSON + Base64) | Anggota 2 | 🟡 Med | ☐ Todo | 2h |
-| `TASK-2.9` | Implementasi `deserialize_token(token_str)` (Base64 + JSON) | Anggota 2 | 🟡 Med | ☐ Todo | 2h |
-| `TASK-2.10` | Implementasi Anti-Replay Mechanism (Nonce Registry & Timestamp) | Anggota 2 | 🟡 Med | ☐ Todo | 2h |
-| `TASK-2.11` | Implementasi `GatePass` Dataclass Model di `models/gate_pass.py` | Anggota 2 | 🟢 Low | ☐ Todo | 2h |
+| `TASK-2.1` | Implementasi `custom_hash(data_str)` Polynomial Rolling Hash | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 3h |
+| `TASK-2.2` | Implementasi Chunking `text_to_blocks()` & `blocks_to_text()` | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 4h |
+| `TASK-2.3` | Implementasi `rsa_encrypt()` & `rsa_decrypt()` Core Engine | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 3h |
+| `TASK-2.4` | Implementasi `sign(manifest_str, priv_key_A)` Digital Signature | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 3h |
+| `TASK-2.5` | Implementasi `verify(manifest_str, signature_blocks, pub_key_A)` | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 3h |
+| `TASK-2.6` | Implementasi `counter_sign(clearance_str, priv_key_B)` Satpam | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 2h |
+| `TASK-2.7` | Implementasi `encrypt_payload()` & `decrypt_payload()` PrivKey/PubKey C | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 3h |
+| `TASK-2.8` | Implementasi `serialize_token(gate_pass_obj)` (JSON + Base64) | Role 2 (Anggota 2) | 🟡 Med | ☐ Todo | 2h |
+| `TASK-2.9` | Implementasi `deserialize_token(token_str)` (Base64 + JSON) | Role 2 (Anggota 2) | 🟡 Med | ☐ Todo | 2h |
+| `TASK-2.10` | Implementasi Anti-Replay Mechanism (Nonce Registry & Timestamp) | Role 2 (Anggota 2) | 🟡 Med | ☐ Todo | 2h |
+| `TASK-2.11` | Implementasi Pydantic Dataclass Model di `models/schemas.py` | Role 2 (Anggota 2) | 🟢 Low | ☐ Todo | 2h |
+| `TASK-2.12` | Implementasi REST API Routers FastAPI (`keygen`, `inspect`, `pass`, `attack`) | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 4h |
 
-### Anggota 3: UI Implementation, Attack Lab & Integration
+### 💻 ROLE 3 — Frontend Next.js (TypeScript) & TanStack Query Lead (Anggota 3)
+* **Fokus Utama**: Seluruh tampilan antarmuka web modern menggunakan Next.js App Router, TypeScript, integrasi data via TanStack Query (CSF), interactive attack lab suite, rekaman video YouTube, dan perakitan laporan Word.
+* **File Kepemilikan**: `frontend/src/app/`, `frontend/src/components/`, `frontend/src/hooks/`, `frontend/src/lib/api.ts`.
+
 | ID | Task | Assignee | Priority | Status | Est. Jam |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| `TASK-3.1` | Setup `app.py` & Shell Navigasi Sidebar/Tabs 6 Modul Utama | Anggota 3 | 🔴 High | ☐ Todo | 3h |
-| `TASK-3.2` | `keygen_view.py`: Panel 3 Entitas (Generate & Manual Input $p, q, e$) | Anggota 3 | 🟡 Med | ☐ Todo | 4h |
-| `TASK-3.3` | `inspector_view.py`: Visualisasi Step Miller-Rabin, EEA & Square-Multiply | Anggota 3 | 🟡 Med | ☐ Todo | 5h |
-| `TASK-3.4` | `issue_view.py`: Form Manifest PPIC, Signing A, Encrypt C, Export Token | Anggota 3 | 🔴 High | ☐ Todo | 4h |
-| `TASK-3.5` | `gate_view.py`: Pos Satpam, Verifikasi Sig A, Counter-Sign B | Anggota 3 | 🔴 High | ☐ Todo | 4h |
-| `TASK-3.6` | `receiving_view.py`: Dual Verification A+B, Dekripsi Catatan C | Anggota 3 | 🔴 High | ☐ Todo | 4h |
-| `TASK-3.7` | `attack_lab_view.py`: 4 Skenario Serangan Interaktif & Status Alarm | Anggota 3 | 🔴 High | ☐ Todo | 5h |
-| `TASK-3.8` | Integrasi Frontend ke Core Engine & State Management | Anggota 3 | 🔴 High | ☐ Todo | 4h |
-| `TASK-3.9` | Audit Trail Log Panel & Real-time History Table | Anggota 3 | 🟢 Low | ☐ Todo | 2h |
-| `TASK-3.10` | Penyusunan Data Sample JSON di `data/samples/` | Anggota 3 | 🟢 Low | ☐ Todo | 1h |
-
+| `TASK-3.1` | Setup Next.js App Router, QueryClientProvider, Layout & Navbar | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 3h |
+| `TASK-3.2` | `keygen/page.tsx`: UI 3 Entitas + TanStack Mutation Key Generation | Role 3 (Anggota 3) | 🟡 Med | ☐ Todo | 4h |
+| `TASK-3.3` | `inspector/page.tsx`: UI Crypto Debugger (EEA, ModExp, Miller-Rabin) | Role 3 (Anggota 3) | 🟡 Med | ☐ Todo | 5h |
+| `TASK-3.4` | `issue/page.tsx`: Form PPIC Manifest + TanStack Mutation Issue Pass | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 4h |
+| `TASK-3.5` | `gate/page.tsx`: Pos Satpam Gate Clearance + Counter-Signing Mutation | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 4h |
+| `TASK-3.6` | `receiving/page.tsx`: Dual Verify & Decrypt Secret Memo Mutation | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 4h |
+| `TASK-3.7` | `attack-lab/page.tsx`: 4 Interactive Cyber Attack Scenarios UI | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 5h |
+| `TASK-3.8` | Setup `src/lib/api.ts` Client Fetcher & TypeScript Interfaces | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 3h |
+| `TASK-3.9` | Audit Trail Real-time Log & LocalStorage Key Cache Synchronization | Role 3 (Anggota 3) | 🟢 Low | ☐ Todo | 2h |
+| `TASK-3.10` | Penyusunan Data Sample JSON di `data/samples/` | Role 3 (Anggota 3) | 🟢 Low | ☐ Todo | 1h |
 ### Bersama (Semua Anggota)
 | ID | Task | Assignee | Priority | Status | Est. Jam |
 | :--- | :--- | :--- | :---: | :---: | :---: |
@@ -66,31 +73,33 @@
 
 ## 2. Phase 0: Setup & Scaffolding (Semua Anggota)
 
-### [TASK-0.1] Inisialisasi Repository Git & Struktur Direktori
+### [TASK-0.1] Inisialisasi Repository Git & Struktur Monorepo (Backend + Frontend)
 - **Assignee**: Semua (Lead: Anggota 3)
 - **Estimasi**: 1 jam | **Priority**: 🔴 High | **Dependency**: Tidak ada
-- **Deskripsi**: Menyiapkan repositori Git lokal dan remote, membuat branch default `main` dan `dev`, serta membuat kerangka folder proyek sesuai spesifikasi PRD.
+- **Deskripsi**: Menyiapkan repositori Git lokal dan remote, membuat branch default `main` dan `dev`, serta membuat kerangka folder proyek terpisah: `backend/` dan `frontend/`.
 - **Acceptance Criteria**:
-  - [ ] Folder terbuat: `core/`, `models/`, `ui/`, `ui/views/`, `data/samples/`, `tests/`.
-  - [ ] File `.gitignore` terkonfigurasi untuk Python (`__pycache__/`, `.venv/`, `*.pyc`, `.env`).
+  - [ ] Folder terbuat: `backend/core/`, `backend/models/`, `backend/routers/`, `frontend/src/app/`, `data/samples/`, `tests/`.
+  - [ ] File `.gitignore` terkonfigurasi untuk Python (`__pycache__/`, `.venv/`) dan Node.js (`node_modules/`, `.next/`).
   - [ ] Branch proteksi disepakati: tidak push langsung ke `main`, gunakan feature branches.
 
-### [TASK-0.2] Penyusunan `requirements.txt`
-- **Assignee**: Semua (Lead: Anggota 2)
+### [TASK-0.2] Penyusunan `requirements.txt` & `package.json`
+- **Assignee**: Semua (Lead: Anggota 2 & Anggota 3)
 - **Estimasi**: 0.5 jam | **Priority**: 🔴 High | **Dependency**: TASK-0.1
-- **Deskripsi**: Menetapkan dependency minimal. Dipastikan **100% bebas library kriptografi eksternal** (`pycryptodome`, `cryptography`, `rsa`, `hashlib`, dsb dilarang keras).
+- **Deskripsi**: Menetapkan dependency minimal:
+  - Backend: `fastapi>=0.110.0`, `uvicorn>=0.28.0`, `pydantic>=2.6.0` (**0% crypto lib**).
+  - Frontend: `next>=15.0.0`, `react`, `@tanstack/react-query>=5.0.0`, `tailwindcss`, `lucide-react`.
 - **Acceptance Criteria**:
-  - [ ] File `requirements.txt` hanya memuat GUI library (contoh: `streamlit>=1.35.0` atau `customtkinter>=5.2.0`), utilitas format string, dan typing jika diperlukan.
-  - [ ] Berhasil diinstall pada virtual environment Python 3.11+.
+  - [ ] `pip install -r backend/requirements.txt` sukses pada virtual environment Python 3.11+.
+  - [ ] `npm install` (atau `pnpm install`) sukses pada direktori `frontend/`.
 
-### [TASK-0.3] Skeleton Entry Point `main.py`
-- **Assignee**: Semua (Lead: Anggota 3)
+### [TASK-0.3] Skeleton Entry Points & CORS Setup
+- **Assignee**: Semua (Lead: Anggota 3 & Anggota 2)
 - **Estimasi**: 1 jam | **Priority**: 🔴 High | **Dependency**: TASK-0.1, TASK-0.2
-- **Deskripsi**: Membuat file `main.py` yang menjalankan aplikasi UI secara bersih, menguji import modul dari folder `core` dan `models`.
+- **Deskripsi**: Membuat file `backend/main.py` (FastAPI instance dengan `CORSMiddleware` aktif untuk `http://localhost:3000`) dan skeleton `frontend/src/app/page.tsx` dengan TanStack Query Provider.
 - **Acceptance Criteria**:
-  - [ ] Perintah `python main.py` (atau `streamlit run main.py`) berhasil membuka jendela aplikasi tanpa crash/import error.
-  - [ ] Logger dasar sistem aktif dan mencetak inisialisasi environment.
-
+  - [ ] Perintah `uvicorn backend.main:app --reload` membuka API Docs di `http://localhost:8000/docs`.
+  - [ ] Perintah `npm run dev` membuka Next.js di `http://localhost:3000` tanpa error.
+  - [ ] Tes ping/healthcheck dari frontend ke backend mengembalikan status HTTP 200.
 ---
 
 ## 3. Phase 1: Core Engine (Anggota 1)
@@ -285,116 +294,127 @@
   - [ ] Validasi window waktu: menolak token jika `current_time > valid_until`.
   - [ ] Menolak token jika kombinasi `(pass_id, nonce)` sudah terdaftar di database `used_nonces`.
 
-### [TASK-2.11] Implementasi `GatePass` Dataclass Model
+### [TASK-2.11] Implementasi Pydantic Schemas di `backend/models/schemas.py`
 - **Assignee**: Anggota 2
 - **Estimasi**: 2 jam | **Priority**: 🟢 Low | **Dependency**: TASK-0.1
-- **Deskripsi**: Mendefinisikan dataclass Python di `models/gate_pass.py` yang mewakili entitas surat jalan secara terstruktur.
+- **Deskripsi**: Mendefinisikan schema validasi Pydantic di `backend/models/schemas.py` yang mewakili payload request dan response API (termasuk `GatePassPackage`, `GateClearance`, `KeypairResponse`, `TraceResponse`).
 - **Acceptance Criteria**:
-  - [ ] Memiliki atribut lengkap: `pass_id`, `issue_date`, `valid_until`, `origin`, `destination`, `items`, `confidential_note_encrypted`, `signature_a`, `counter_signature_b`, `nonce`, `status`.
-  - [ ] Memiliki method helper: `to_canonical_manifest_str()` untuk hashing deterministik tanpa ambigu whitespace.
+  - [ ] Schema lengkap: `GatePassPackage`, `GateClearance`, `KeypairRequest`, `KeypairResponse`, `ValidateKeyRequest`, `IssuePassRequest`, `GateVerifyRequest`, `ClearanceRequest`, `ReceiveRequest`, `AttackRequest`.
+  - [ ] Method helper `to_canonical_manifest_str()` untuk serialisasi deterministik sebelum hashing.
+
+### [TASK-2.12] Implementasi REST API Routers FastAPI
+- **Assignee**: Anggota 2
+- **Estimasi**: 4 jam | **Priority**: 🔴 High | **Dependency**: TASK-2.4, TASK-2.7, TASK-2.10, TASK-2.11
+- **Deskripsi**: Membangun modular APIRouter di `backend/routers/` untuk menghubungkan frontend Next.js dengan core engine RSA.
+- **Acceptance Criteria**:
+  - [ ] `keygen_router.py`: endpoint `/api/v1/keys/generate` dan `/api/v1/keys/validate`.
+  - [ ] `inspect_router.py`: endpoint `/api/v1/inspect/trace` (mengembalikan list of steps untuk visualizer).
+  - [ ] `pass_router.py`: endpoint `/api/v1/pass/issue`, `/api/v1/pass/gate-verify`, `/api/v1/pass/gate-clearance`, `/api/v1/pass/receive`.
+  - [ ] `attack_router.py`: endpoint `/api/v1/attack/simulate` (mengembalikan detail kegagalan kriptografis).
+  - [ ] Terintegrasi ke `backend/main.py` dan seluruh rute terdokumentasi di Swagger UI (`/docs`).
 
 ---
 
-## 5. Phase 3: UI Implementation & Integration (Anggota 3)
+## 5. Phase 3: UI Implementation & Integration — Next.js & TanStack Query (Anggota 3)
 
-### [TASK-3.1] Setup `app.py` & Navigasi Sidebar/Tabs
+### [TASK-3.1] Setup Next.js App Router, QueryClientProvider & Shell Layout
 - **Assignee**: Anggota 3
 - **Estimasi**: 3 jam | **Priority**: 🔴 High | **Dependency**: TASK-0.3
-- **Deskripsi**: Membangun kerangka navigasi utama aplikasi UI, mendesain theme (industrial factory / dark mode), dan menghubungkan routing antar 6 view utama.
+- **Deskripsi**: Membangun kerangka navigasi Next.js (App Router), konfigurasi Tailwind CSS, menyediakan `QueryClientProvider` pada `layout.tsx` untuk CSF, dan mendesain navigasi navbar/sidebar yang responsif.
 - **Acceptance Criteria**:
-  - [ ] Navigasi sidebar/tab mulus berpindah ke 6 view: Keygen, Crypto Inspector, Penerbitan (PPIC), Pos Gerbang, Penerimaan Gudang, dan Attack Lab Suite.
-  - [ ] Menyediakan Global State Management (menyimpan keypairs A, B, C aktif dan riwayat token).
+  - [ ] Navigasi mulus berpindah antar 6 rute: `/keygen`, `/inspector`, `/issue`, `/gate`, `/receiving`, dan `/attack-lab`.
+  - [ ] TanStack Query Provider aktif membungkus aplikasi tanpa hydration mismatch.
+  - [ ] Tema visual konsisten: *Dark / Industrial Slate Theme* dengan styling Tailwind CSS.
 
-### [TASK-3.2] `keygen_view.py`: Panel Kunci Multi-Entitas
+### [TASK-3.2] `src/app/keygen/page.tsx`: Panel Kunci Multi-Entitas (Next.js + TanStack)
 - **Assignee**: Anggota 3
-- **Estimasi**: 4 jam | **Priority**: 🟡 Med | **Dependency**: TASK-1.8, TASK-3.1
-- **Deskripsi**: Antarmuka untuk membangkitkan dan mengelola kunci 3 entitas (Entitas A - PPIC, Entitas B - Satpam, Entitas C - Gudang).
+- **Estimasi**: 4 jam | **Priority**: 🟡 Med | **Dependency**: TASK-1.8, TASK-2.12, TASK-3.1
+- **Deskripsi**: Halaman pengelolaan kunci 3 entitas (PPIC, Satpam, Gudang) menggunakan TanStack Query mutation untuk generate dan validasi.
 - **Acceptance Criteria**:
-  - [ ] Tab terpisah untuk Entitas A, B, dan C.
-  - [ ] Opsi Auto Generate dengan pilihan bit length (64, 128, 256, 512-bit).
-  - [ ] Opsi Manual Input parameter $p, q, e$ dengan validasi real-time (tampil error jika $p, q$ bukan prima atau $\gcd(e, \phi) \ne 1$).
-  - [ ] Menampilkan ringkasan parameter: $n, \phi(n), e, d$ dalam card UI yang rapi.
-  - [ ] Tombol simpan ke Active Session State.
+  - [ ] Tab pemilih Entitas A, B, dan C.
+  - [ ] Dropdown ukuran bit (32, 64, 128 bit) & tombol "Generate Keypair" via `useMutation`.
+  - [ ] Input manual $p, q, e$ dengan tombol "Validasi Manual" via `useMutation`.
+  - [ ] Cards UI interaktif menampilkan parameter $n, \phi(n), e, d$ dan badge status keabsahan.
+  - [ ] Penyimpanan kunci aktif ke LocalStorage / Client State agar tidak hilang saat navigasi tab.
 
-### [TASK-3.3] `inspector_view.py`: Visualisasi Komputasi Kriptografi
+### [TASK-3.3] `src/app/inspector/page.tsx`: Visualisasi Step-by-Step Crypto Debugger
 - **Assignee**: Anggota 3
-- **Estimasi**: 5 jam | **Priority**: 🟡 Med | **Dependency**: TASK-1.9, TASK-3.1
-- **Deskripsi**: Panel edukasi dan debugging visual matematika RSA dari data yang dikumpulkan oleh `inspector.py`.
+- **Estimasi**: 5 jam | **Priority**: 🟡 Med | **Dependency**: TASK-1.9, TASK-2.12, TASK-3.1
+- **Deskripsi**: Halaman visualisasi algoritma kriptografi (Miller-Rabin, Extended Euclidean, Square-and-Multiply) memanfaatkan respons JSON trace dari endpoint `/api/v1/inspect/trace`.
 - **Acceptance Criteria**:
-  - [ ] Sub-tab 1 (Miller-Rabin): tabel langkah per ronde pengujian basis $a$, status $x = a^d \pmod n$, dan kuadrat bertingkat.
-  - [ ] Sub-tab 2 (EEA Table): visualisasi tabel kolom $q, r, s, t$ pencarian $d \equiv e^{-1} \pmod \phi$.
-  - [ ] Sub-tab 3 (Square-and-Multiply): visualisasi bit eksponen, operasi Square vs Square+Multiply, dan running value modulo.
-  - [ ] Sub-tab 4 (Chunking Visualizer): visualisasi teks string dipecah menjadi karakter, byte big-endian, dan blok integer $< n$.
+  - [ ] Tab 1 (Miller-Rabin): tabel baris-demi-baris putaran basis $a$, eksponen $d$, dan status saksi prima.
+  - [ ] Tab 2 (EEA Table): tabel interaktif kolom langkah $q, r1, r2, r, x1, x2, x, y1, y2, y$.
+  - [ ] Tab 3 (Square-and-Multiply): visualisasi bit eksponen dan operasi modulo step-by-step.
+  - [ ] Indikator loading spinner TanStack Query saat komputasi berlangsung.
 
-### [TASK-3.4] `issue_view.py`: Penerbitan Surat Jalan (Entitas A)
+### [TASK-3.4] `src/app/issue/page.tsx`: Form Penerbitan Surat Jalan (PPIC)
 - **Assignee**: Anggota 3
-- **Estimasi**: 4 jam | **Priority**: 🔴 High | **Dependency**: TASK-2.4, TASK-2.7, TASK-2.8, TASK-3.1
-- **Deskripsi**: Form penerbitan surat jalan oleh PPIC. Mengisi manifest barang, catatan rahasia, menandatangani dengan PrivKey A, mengenkripsi catatan dengan PubKey C, dan menghasilkan token.
+- **Estimasi**: 4 jam | **Priority**: 🔴 High | **Dependency**: TASK-2.12, TASK-3.1
+- **Deskripsi**: Form penerbitan surat jalan oleh PPIC. Mengisi manifest, catatan sensitif (rahasia), mengirim ke `/api/v1/pass/issue`, dan menampilkan token Base64 / QR Code.
 - **Acceptance Criteria**:
-  - [ ] Form input: ID Pass, Tujuan Gudang, Daftar Barang (Nama, Qty, Unit), Catatan Rahasia Gudang.
-  - [ ] Tombol aksi `Sign & Issue Gate Pass`.
-  - [ ] Preview canonical manifest dan nilai hash $H$.
-  - [ ] Menampilkan ciphertext catatan rahasia.
-  - [ ] Output token dalam box teks (Base64/JSON) dengan tombol `Copy to Clipboard` dan tombol simulasi kirim ke Gerbang.
+  - [ ] Form input lengkap: Dokumen ID, Truk, Supir, Rincian Barang (SKU, Qty, Unit), Catatan Rahasia Gudang.
+  - [ ] Eksekusi penerbitan via TanStack `useMutation({ mutationFn: issuePass })`.
+  - [ ] Menampilkan ringkasan manifest, digest hash, dan token Base64 yang dihasilkan.
+  - [ ] QR Code viewer dan tombol "Copy Token" yang menyalin Base64 ke clipboard.
 
-### [TASK-3.5] `gate_view.py`: Pos Verifikasi Gerbang (Entitas B)
+### [TASK-3.5] `src/app/gate/page.tsx`: Pos Verifikasi Gerbang Satpam
 - **Assignee**: Anggota 3
-- **Estimasi**: 4 jam | **Priority**: 🔴 High | **Dependency**: TASK-2.5, TASK-2.6, TASK-2.9, TASK-3.1
-- **Deskripsi**: Antarmuka Pos Satpam Gerbang. Melakukan paste token dari Entitas A, verifikasi tanda tangan A, cek validitas waktu/replay, dan melakukan counter-signing clearance.
+- **Estimasi**: 4 jam | **Priority**: 🔴 High | **Dependency**: TASK-2.12, TASK-3.1
+- **Deskripsi**: Antarmuka Pos Satpam Gerbang. Melakukan paste/scan token, verifikasi tanda tangan A, cek validitas waktu/replay, dan melakukan counter-signing clearance.
 - **Acceptance Criteria**:
-  - [ ] Input field untuk paste token surat jalan.
-  - [ ] Tombol `Verifikasi Surat Jalan`.
-  - [ ] Indikator visual besar: **HIJAU (VALID)** atau **MERAH (INVALID/TAMPERED)**.
-  - [ ] Jika valid: tombol `Approve & Counter-Sign (Gate Clearance)` aktif.
-  - [ ] Menghasilkan token yang telah diperbarui dengan tanda tangan Entitas B ($S_B$).
+  - [ ] Textarea input token Base64 surat jalan.
+  - [ ] Tombol `Verifikasi Integritas` via `useMutation`.
+  - [ ] Banner status visual besar: **HIJAU (VALID - OTENTIK)** atau **MERAH (INVALID/TERMANIPULASI)**.
+  - [ ] Jika valid: tombol `Approve & Counter-Sign (Gate Clearance)` aktif untuk membubuhkan tanda tangan satpam.
+  - [ ] Menampilkan token ter-update yang siap disalin supir.
 
-### [TASK-3.6] `receiving_view.py`: Penerimaan Gudang (Entitas C)
+### [TASK-3.6] `src/app/receiving/page.tsx`: Konfirmasi Penerimaan Gudang Cabang
 - **Assignee**: Anggota 3
-- **Estimasi**: 4 jam | **Priority**: 🔴 High | **Dependency**: TASK-2.5, TASK-2.6, TASK-2.7, TASK-3.1
+- **Estimasi**: 4 jam | **Priority**: 🔴 High | **Dependency**: TASK-2.12, TASK-3.1
 - **Deskripsi**: Antarmuka Gudang Tujuan Penerima. Menerima token bertanda tangan ganda ($S_A + S_B$), memverifikasi keduanya, dan mendekripsi catatan rahasia menggunakan PrivKey C.
 - **Acceptance Criteria**:
-  - [ ] Input field paste token dual-signed.
-  - [ ] Verifikasi independen tanda tangan A (PPIC) dan tanda tangan B (Satpam).
-  - [ ] Indikator status ganda: Sig A Valid/Invalid, Sig B Valid/Invalid.
-  - [ ] Tombol `Dekripsi Catatan Rahasia Gudang` hanya aktif jika kunci C tersedia.
-  - [ ] Tampil plaintext catatan sensitif dengan benar.
+  - [ ] Textarea input token clearance akhir.
+  - [ ] Verifikasi ganda: badge status validitas Tanda Tangan PPIC dan Tanda Tangan Satpam.
+  - [ ] Tombol `Buka Catatan Rahasia (Dekripsi PrivKey C)`.
+  - [ ] Menampilkan plaintext catatan rahasia yang berhasil didekripsi di dalam box terproteksi.
 
-### [TASK-3.7] `attack_lab_view.py`: 4 Skenario Attack Lab Suite
+### [TASK-3.7] `src/app/attack-lab/page.tsx`: Interactive Cyber Attack Suite
 - **Assignee**: Anggota 3
-- **Estimasi**: 5 jam | **Priority**: 🔴 High | **Dependency**: TASK-2.5, TASK-2.10, TASK-3.1
-- **Deskripsi**: Halaman khusus laboratorium simulasi serangan interaktif untuk membuktikan integritas kriptografi RSA di depan dosen/penguji.
+- **Estimasi**: 5 jam | **Priority**: 🔴 High | **Dependency**: TASK-2.12, TASK-3.1
+- **Deskripsi**: Halaman laboratorium simulasi serangan interaktif untuk video demo YouTube.
 - **Acceptance Criteria**:
-  - [ ] **Tab Skenario 1 (Payload Tampering)**: mengubah kuantitas barang di manifest (misal $10 \to 100$), lalu jalankan verifikasi $\to$ Status **REJECTED (Hash Mismatch)**.
-  - [ ] **Tab Skenario 2 (Rogue Signer)**: menandatangani manifest menggunakan private key asing (bukan Entitas A) $\to$ Status **REJECTED (Invalid Signature / Untrusted Signer)**.
-  - [ ] **Tab Skenario 3 (Signature Corruption)**: memodifikasi 1 digit pada signature hex/block $\to$ Status **REJECTED (Corrupted Mathematical Signature)**.
-  - [ ] **Tab Skenario 4 (Replay Attack)**: submit ulang token surat jalan yang sudah pernah disetujui sebelumnya $\to$ Status **REJECTED (Replay Detected / Nonce Already Used)**.
-  - [ ] Setiap tab memiliki penjelasan teknis penyebab kegagalan secara matematis.
+  - [ ] 4 Tab Preset Serangan:
+    1. *Payload Tampering*: memodifikasi isi kuantitas barang di manifest.
+    2. *Rogue Signer*: memalsukan tanda tangan menggunakan kunci privat penyerang.
+    3. *Corrupted Signature*: memodifikasi 1 karakter token tanda tangan digital.
+    4. *Replay Attack*: mengirimkan ulang token yang sudah kadaluwarsa / pernah di-clearance.
+  - [ ] Tombol `Injeksi Serangan & Verifikasi` via TanStack mutation.
+  - [ ] Alarm status **MERAH/DITOLAK** dengan penjelasan rinci titik kegagalan matematis RSA.
 
-### [TASK-3.8] Integrasi Semua View ke Core Engine
+### [TASK-3.8] `src/lib/api.ts`: API Client & TypeScript Interfaces
 - **Assignee**: Anggota 3
-- **Estimasi**: 4 jam | **Priority**: 🔴 High | **Dependency**: Selesainya Phase 1 & Phase 2
-- **Deskripsi**: Menghubungkan seluruh event handler tombol di view dengan fungsi-fungsi pada `core/rsa_engine.py`, `core/primes.py`, `core/hashing.py`, dan `models/gate_pass.py`.
+- **Estimasi**: 3 jam | **Priority**: 🔴 High | **Dependency**: TASK-2.11, TASK-2.12
+- **Deskripsi**: Membangun centralized fetcher di `src/lib/api.ts` dan tipe TypeScript di `src/types/api.ts` yang selaras dengan schema Pydantic FastAPI.
 - **Acceptance Criteria**:
-  - [ ] Tidak ada mock data tersisa; seluruh proses enkripsi, dekripsi, hash, sign, dan verify memanggil engine riil.
-  - [ ] Exception handling menyeluruh agar UI tidak pernah blank/crash saat input user tidak valid.
+  - [ ] Fungsi fetcher untuk seluruh endpoint REST API backend dengan error handling standar.
+  - [ ] Tipe TypeScript `GatePassPackage`, `Keypair`, `InspectStep`, `AttackResult` terdefinisi rapi.
 
-### [TASK-3.9] Audit Trail Log Panel
+### [TASK-3.9] Audit Trail Real-time Log & LocalStorage Key Cache
 - **Assignee**: Anggota 3
 - **Estimasi**: 2 jam | **Priority**: 🟢 Low | **Dependency**: TASK-3.1
-- **Deskripsi**: Panel audit log yang mencatat timestamp, tindakan, entitas pelaksana, Pass ID, dan status hasil verifikasi.
+- **Deskripsi**: Menyediakan riwayat log audit verifikasi di sisi client dan sinkronisasi kunci aktif ke LocalStorage browser.
 - **Acceptance Criteria**:
-  - [ ] Menampilkan riwayat log aktivitas dalam bentuk tabel kronologis (terbaru di atas).
-  - [ ] Ada tombol export riwayat log ke format CSV atau JSON.
+  - [ ] Tabel log di footer / panel samping mencatat setiap aktivitas verifikasi (waktu, doc ID, status valid/invalid).
+  - [ ] Kunci aktif ketiga entitas tersimpan di LocalStorage sehingga tidak perlu generate ulang setiap refresh browser.
 
 ### [TASK-3.10] Penyusunan Data Sample JSON di `data/samples/`
 - **Assignee**: Anggota 3
-- **Estimasi**: 1 jam | **Priority**: 🟢 Low | **Dependency**: TASK-2.8
-- **Deskripsi**: Menyediakan file contoh siap-pakai di folder `data/samples/` untuk memudahkan demo instan tanpa perlu mengetik manual dari nol.
+- **Estimasi**: 1 jam | **Priority**: 🟢 Low | **Dependency**: TASK-3.4
+- **Deskripsi**: Menyiapkan file data contoh untuk mempercepat pengujian dan rekaman video presentasi.
 - **Acceptance Criteria**:
   - [ ] `sample_keys.json`: 3 pasang kunci A, B, C siap pakai.
   - [ ] `sample_manifest.json`: contoh manifest barang pabrik realistik.
   - [ ] `sample_valid_token.txt`: contoh token yang valid dan siap diverifikasi.
-
 ---
 
 ## 6. Phase 4: Testing, Video Demo & Final Delivery (Semua Anggota)
@@ -504,8 +524,8 @@ graph TD
         T1_8 --> T1_10[TASK-1.10: Manual Math Test]
     end
 
-    subgraph Phase 2: Security Protocol (Anggota 2)
-        T0_1 --> T2_11[TASK-2.11: GatePass Model]
+    subgraph Phase 2: Security Protocol & FastAPI (Anggota 2)
+        T0_1 --> T2_11[TASK-2.11: Pydantic Schemas]
         T0_1 --> T2_1[TASK-2.1: Custom Rolling Hash]
         T0_1 --> T2_2[TASK-2.2: Text Chunking]
         T1_7 --> T2_3[TASK-2.3: RSA Encrypt/Decrypt Core]
@@ -518,32 +538,22 @@ graph TD
         T2_11 --> T2_8[TASK-2.8: Serialize Token]
         T2_8 --> T2_9[TASK-2.9: Deserialize Token]
         T2_11 --> T2_10[TASK-2.10: Anti-Replay Nonce]
+        T2_4 --> T2_12[TASK-2.12: FastAPI REST Routers]
+        T2_7 --> T2_12
+        T2_10 --> T2_12
     end
 
-    subgraph Phase 3: UI & Attack Lab (Anggota 3)
-        T0_3 --> T3_1[TASK-3.1: UI Shell & Navigasi]
-        T1_8 --> T3_2[TASK-3.2: Keygen View]
-        T3_1 --> T3_2
-        T1_9 --> T3_3[TASK-3.3: Inspector View]
-        T3_1 --> T3_3
-        T2_4 --> T3_4[TASK-3.4: Issue View PPIC]
-        T2_7 --> T3_4
-        T2_8 --> T3_4
-        T3_1 --> T3_4
-        T2_5 --> T3_5[TASK-3.5: Gate Verification View]
-        T2_6 --> T3_5
-        T3_1 --> T3_5
-        T2_7 --> T3_6[TASK-3.6: Receiving View Gudang]
-        T3_1 --> T3_6
-        T2_5 --> T3_7[TASK-3.7: Attack Lab Suite]
-        T2_10 --> T3_7
-        T3_1 --> T3_7
-        T3_2 --> T3_8[TASK-3.8: UI-Core Integration]
-        T3_4 --> T3_8
-        T3_5 --> T3_8
-        T3_6 --> T3_8
-        T3_7 --> T3_8
-        T3_1 --> T3_9[TASK-3.9: Audit Log Panel]
+    subgraph Phase 3: Frontend Next.js & TanStack (Anggota 3)
+        T0_3 --> T3_1[TASK-3.1: Next.js Layout & QueryProvider]
+        T2_12 --> T3_8[TASK-3.8: API Client & TS Types]
+        T3_1 --> T3_8
+        T3_8 --> T3_2[TASK-3.2: Keygen Page]
+        T3_8 --> T3_3[TASK-3.3: Inspector Page]
+        T3_8 --> T3_4[TASK-3.4: Issue Page PPIC]
+        T3_8 --> T3_5[TASK-3.5: Gate Clearance Page]
+        T3_8 --> T3_6[TASK-3.6: Receiving Page]
+        T3_8 --> T3_7[TASK-3.7: Attack Lab Suite Page]
+        T3_1 --> T3_9[TASK-3.9: Audit Log & Key Cache]
         T2_8 --> T3_10[TASK-3.10: Sample JSON Data]
     end
 

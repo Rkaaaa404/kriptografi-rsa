@@ -10,10 +10,10 @@
 * **Kategori Studi Kasus:** Manajemen Rantai Pasok & Pergudangan (*Warehouse Inbound & Outbound Security*)
 * **Batas Waktu Pengumpulan:** Senin, 21 Oktober 2024 pukul 10.00 WIB
 * **Target Anggota Tim:** 3 Orang (Cryptographic Engine, Security & Data Protocol, UI & Integration)
-* **Teknologi Rekomendasi:** 
-  * **Opsi A (Desktop GUI):** Python 3.11+ dengan `CustomTkinter` atau `PyQt6` (Sangat disukai untuk demo luring/video karena instalasi lokal mudah).
-  * **Opsi B (Web UI):** Python `FastAPI` / `Flask` + `React`/`Tailwind` atau `Streamlit` (Cepat dibuat, responsif, dan mudah didemokan).
-  * **Aturan Mutlak:** 0% library kriptografi eksternal (`pycryptodome`, `cryptography`, `crypto-js`, dll. **DILARANG**). Seluruh fungsi RSA ditulis murni (*from scratch*).
+* **Teknologi Terpilih (Client-Server Architecture):**
+  * **Backend API:** Python 3.11+ dengan **FastAPI** + `uvicorn` & `pydantic` (Menjalankan core engine RSA from scratch, 0% library kriptografi).
+  * **Frontend Web:** **Next.js (App Router)** + **TypeScript** + **TanStack Query** (`@tanstack/react-query` untuk Client-Side Fetching / CSF & state caching) + **Tailwind CSS**.
+  * **Aturan Mutlak:** 0% library kriptografi eksternal di backend maupun frontend (`pycryptodome`, `cryptography`, `crypto-js`, dll. **DILARANG KERAS**). Seluruh fungsi RSA ditulis murni (*from scratch*) di layer backend Python.
 
 ---
 
@@ -222,31 +222,43 @@ sequenceDiagram
 
 ```text
 rsa-warehouse-gatepass/
-├── core/
-│   ├── __init__.py
-│   ├── math_utils.py       # gcd, extended_euclidean, mod_inverse, mod_exp
-│   ├── primes.py           # trial division / miller-rabin prime test & generator
-│   ├── inspector.py        # tracer step-by-step: EEA table, square-multiply trace
-│   ├── rsa_engine.py       # keygen, rsa_encrypt, rsa_decrypt, sign, verify
-│   └── hashing.py          # manual checksum / polynomial hash generator
-├── models/
-│   ├── __init__.py
-│   └── gate_pass.py        # data model manifest & multi-signature package
-├── ui/
-│   ├── views/
-│   │   ├── keygen_view.py     # dashboard kunci multi-entitas (PPIC, Satpam, Cabang)
-│   │   ├── inspector_view.py  # tracer kalkulasi matematika ("Crypto Under the Hood")
-│   │   ├── issue_view.py      # form penerbitan PPIC, signing & enkripsi
-│   │   ├── gate_view.py       # pos satpam, verifikasi & counter-signing
-│   │   ├── receiving_view.py  # pos penerimaan cabang & dekripsi catatan rahasia
-│   │   └── attack_lab_view.py # simulator 4 skenario serangan kriptografi
-│   └── app.py                 # entrypoint GUI
-├── data/
-│   └── samples/               # contoh berkas manifest & token JSON
-├── docs/
-│   └── LAPORAN_TUGAS.docx     # format laporan wajib
-├── main.py                    # Main launcher
-├── requirements.txt           # GUI libs only (customtkinter/streamlit) - NO CRYPTO LIB
+├── backend/
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── math_utils.py       # gcd, extended_euclidean, mod_inverse, mod_exp
+│   │   ├── primes.py           # trial division, miller-rabin prime test & generator
+│   │   ├── inspector.py        # tracer step-by-step: EEA table, square-multiply trace
+│   │   ├── rsa_engine.py       # keygen, rsa_encrypt, rsa_decrypt, sign, verify
+│   │   └── hashing.py          # manual checksum / polynomial hash generator
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── schemas.py          # Pydantic schemas (GatePassPackage, API payloads)
+│   ├── routers/
+│   │   ├── keygen_router.py    # POST /api/v1/keys/generate, /validate
+│   │   ├── inspect_router.py   # POST /api/v1/inspect/eea, /modexp, /miller-rabin
+│   │   ├── pass_router.py      # POST /api/v1/pass/issue, /gate-verify, /receive
+│   │   └── attack_router.py    # POST /api/v1/attack/simulate
+│   ├── main.py                 # FastAPI application & CORS configuration
+│   └── requirements.txt        # fastapi, uvicorn, pydantic (NO CRYPTO LIB)
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── layout.tsx      # Root layout with TanStack Query Provider
+│   │   │   ├── page.tsx        # Dashboard landing overview
+│   │   │   ├── keygen/page.tsx # Multi-entity keygen management
+│   │   │   ├── inspector/page.tsx # Visualisasi step-by-step crypto debugger
+│   │   │   ├── issue/page.tsx  # Form PPIC issue gate pass & primary sign
+│   │   │   ├── gate/page.tsx   # Pos satpam check & counter-signing
+│   │   │   ├── receiving/page.tsx # Pos penerima cabang & decrypt secret memo
+│   │   │   └── attack-lab/page.tsx # 4 skenario simulasi serangan siber
+│   │   ├── components/         # Reusable UI cards, tables, badge, QR viewer
+│   │   ├── hooks/              # Custom TanStack Query hooks (useKeygen, useInspect, etc.)
+│   │   ├── lib/api.ts          # API Client fetcher terpusat
+│   │   └── types/api.ts        # TypeScript interfaces matching backend schemas
+│   ├── package.json            # Next.js, React, @tanstack/react-query, tailwindcss
+│   └── tsconfig.json
+├── data/samples/               # Contoh manifest JSON & sample keys
+├── docs/LAPORAN_TUGAS.docx     # Dokumen Word laporan tugas wajib
 └── README.md
 ```
 
@@ -276,18 +288,17 @@ Agar pembagian kerja seimbang dan masing-masing anggota memiliki kontribusi nyat
   * Modul `inspector.py`: Logging dan pengeksposan trace komputasi per langkah (tabel EEA dan trace bit eksponen).
   * Bukti perhitungan manual angka kecil untuk bab laporan Word.
 
-* **Anggota 2 — Security Protocol, Multi-Party Pipeline & Data Chunking:**
+* **Anggota 2 — Security Protocol, Multi-Party Pipeline & FastAPI Backend:**
   * Implementasi modul protokol data (`hashing.py`, `rsa_engine.py`):
     * Logika *Encoding/Decoding* dan *Blocking/Chunking* teks menjadi blok integer $m_i < n$ serta penggabungan kembali.
     * Implementasi fungsi digest hash dokumen dari nol.
     * Pembuatan alur tanda tangan primer (*PPIC Sign*), tanda tangan sekunder (*Gate Counter-Sign*), dan enkripsi/dekripsi payload rahasia (*Confidential Memo Encryption*).
     * Penanganan pencegahan *replay attack* (nonce/timestamp validation) & serialisasi token Base64/JSON.
+  * Pembangunan REST API Backend dengan **FastAPI** (`backend/routers/` & `backend/models/schemas.py`).
 
-* **Anggota 3 — Frontend UI, Attack Lab & Video/Report Lead:**
-  * Perancangan antarmuka pengguna interaktif (`ui/`):
-    * Dashboard Manajemen Kunci 3 Entitas (PPIC, Satpam, Gudang Tujuan).
-    * Antarmuka "Crypto Inspector" (menampilkan tabel EEA dan visualisasi modular exp secara grafis).
-    * Formulir Operasional: Penerbitan Surat Jalan, Pos Satpam Gerbang, dan Pos Penerimaan Cabang.
-    * Lab Simulasi Serangan (*Attack Suite*) untuk menguji 4 skenario serangan interaktif.
-  * Integrasi seluruh modul dengan `main.py`.
-  * Sutradara video presentasi YouTube (pembagian sesi bicara per anggota, demo program) dan kompilasi laporan Word (`.docx`).
+* **Anggota 3 — Frontend Next.js (TypeScript), TanStack Query & Video/Report Lead:**
+  * Perancangan antarmuka modern Web SPA/SSR menggunakan **Next.js (App Router)** dan **TypeScript**:
+    * Integrasi **TanStack Query** (`@tanstack/react-query`) untuk Client-Side Fetching (CSF), caching, status loading/error, dan mutations.
+    * Pembuatan 6 halaman fungsional: Dashboard, Key Management, Crypto Inspector, Issue Gate Pass, Gate Clearance, Receiving Point, dan Attack Lab Suite.
+  * Integrasi komunikasi frontend $\leftrightarrow$ FastAPI backend (`src/lib/api.ts`).
+  * Sutradara video presentasi YouTube (pembagian sesi bicara per anggota, demo interaktif) dan kompilasi laporan Word (`.docx`).

@@ -4,8 +4,8 @@
 - **Versi Dokumen**: 1.0.0
 - **Tanggal**: 6 Oktober 2024
 - **Dokumen Terkait**:
-  - PRD: [PRD_RSA_Warehouse_GatePass.md](./PRD_RSA_Warehouse_GatePass.md)
-  - Task & Rencana Kerja: [task.md](./task.md)
+  - PRD: [02-prd-securepass-rsa.md](./02-prd-securepass-rsa.md)
+  - Task & Rencana Kerja: [04-task-roadmap.md](./04-task-roadmap.md)
 
 ---
 
@@ -17,70 +17,69 @@ SecurePass RSA adalah sistem verifikasi dan otorisasi clearance surat jalan pabr
 
 ## 2. Arsitektur Sistem
 
-Sistem dirancang menggunakan arsitektur 3-Layer terpisah (*Decoupled Layered Architecture*) guna memastikan modularitas, kemudahan unit testing matematis, serta isolasi antara interaksi antarmuka pengguna dengan mesin kriptografi.
+Sistem dirancang menggunakan arsitektur **Client-Server Terpisah (*Decoupled RESTful Architecture*)**:
+1. **Frontend Web**: Dibangun menggunakan **Next.js (App Router)** + **TypeScript** + **TanStack Query** (`@tanstack/react-query` untuk Client-Side Fetching / CSF & state mutations) + **Tailwind CSS**.
+2. **Backend API**: Dibangun menggunakan Python 3.11+ **FastAPI** + `uvicorn` & `pydantic` yang mengelola routing, validasi skema request/response, dan anti-replay registry.
+3. **Core Engine**: Seluruh logika matematika RSA, pengujian prima, invers modular, eksponensiasi modular, custom hashing, dan blocking diimplementasikan manual 100% dari nol (*0% external crypto library*).
 
 ### 2.1 Diagram Layer Sistem
 
 ```mermaid
 graph TD
-    subgraph UI_Layer["UI Layer (CustomTkinter / Streamlit)"]
-        V1[Keygen View]
-        V2[Inspector View]
-        V3[Issue View]
-        V4[Gate Clearance View]
-        V5[Receiving View]
-        V6[Attack Lab View]
+    subgraph Frontend_Layer["Frontend Layer: Next.js (App Router, TS, TanStack Query)"]
+        P1["/keygen (Key Management)"]
+        P2["/inspector (Crypto Debugger)"]
+        P3["/issue (PPIC Gate Pass)"]
+        P4["/gate (Gate Clearance)"]
+        P5["/receiving (Receiving Point)"]
+        P6["/attack-lab (Attack Suite)"]
+        TQ["TanStack Query Client (@tanstack/react-query)"]
+        API_CLIENT["Centralized Fetcher: src/lib/api.ts"]
+        P1 --> TQ
+        P2 --> TQ
+        P3 --> TQ
+        P4 --> TQ
+        P5 --> TQ
+        P6 --> TQ
+        TQ --> API_CLIENT
     end
 
-    subgraph Engine_Layer["Core Engine Layer (from scratch)"]
-        FA[RSA Engine Façade: rsa_engine.py]
-        INS[Inspector Engine: inspector.py]
-        HASH[Custom Hash: hashing.py]
-        PRIME[Primes Engine: primes.py]
-        MATH[Math Utils: math_utils.py]
+    subgraph Network_Boundary["HTTP / REST API Boundary (JSON)"]
+        API_CLIENT -->|HTTP POST / GET| ROUTERS
     end
 
-    subgraph Data_Layer["Data & Persistence Layer"]
-        MODEL[Domain Models: gate_pass.py]
-        TOKEN[Token Serializer: JSON / Base64 / QR]
-        REPLAY[In-Memory Nonce Registry]
-        AUDIT[Audit Trail Log (JSON Lines)]
+    subgraph Backend_Layer["Backend Layer: FastAPI (Python 3.11+)"]
+        ROUTERS["FastAPI APIRouters: keygen, inspect, pass, attack"]
+        SCHEMAS["Pydantic Schemas: GatePassPackage, Keypair, Trace"]
+        REPLAY["In-Memory Nonce Registry"]
+        ROUTERS --> SCHEMAS
+        ROUTERS --> REPLAY
+        ROUTERS --> FA
     end
 
-    %% Relasi UI ke Engine
-    V1 --> FA
-    V2 --> INS
-    V2 --> FA
-    V3 --> FA
-    V4 --> FA
-    V5 --> FA
-    V6 --> FA
-
-    %% Relasi Engine Internal
-    FA --> HASH
-    FA --> PRIME
-    FA --> MATH
-    FA --> INS
-    PRIME --> MATH
-    PRIME --> INS
-    MATH --> INS
-
-    %% Relasi Engine & Data
-    FA --> MODEL
-    FA --> TOKEN
-    FA --> REPLAY
-    V3 --> AUDIT
-    V4 --> AUDIT
-    V5 --> AUDIT
-    V6 --> AUDIT
+    subgraph Engine_Layer["Core Engine Layer (Pure Python from scratch)"]
+        FA["RSA Engine Façade: rsa_engine.py"]
+        INS["Inspector Engine: inspector.py"]
+        HASH["Custom Hash: hashing.py"]
+        PRIME["Primes Engine: primes.py"]
+        MATH["Math Utils: math_utils.py"]
+        FA --> HASH
+        FA --> PRIME
+        FA --> MATH
+        FA --> INS
+        PRIME --> MATH
+        PRIME --> INS
+        MATH --> INS
+    end
 ```
 
-### 2.2 Aliran Data Antar Layer
-1. **User Action / Input**: UI Layer menangkap input pengguna (teks manifest, kunci manual/auto, QR token terunggah).
-2. **Façade Processing**: UI Layer memanggil fungsi pada `rsa_engine.py` tanpa mengeksekusi operasi matematika modular secara langsung.
-3. **Core Computation**: `rsa_engine.py` memanfaatkan `hashing.py` untuk pembuatan intisari data (*digest*), `primes.py` untuk penemuan prima, dan `math_utils.py` untuk modular exponentiation dan EEA. Seluruh tahap perhitungan dapat mengirimkan rekaman *step-by-step* ke `inspector.py`.
-4. **Data Encapsulation**: Hasil kriptografi dibungkus ke dalam objek dataclass `GatePassPackage` pada `models/gate_pass.py`, lalu diserialisasi menjadi JSON Base64 atau QR Code token. State clearance dan nonce disimpan pada Registry & Log Audit.
-
+### 2.2 Aliran Data Antar Layer (Client-Side Fetching / CSF Flow)
+1. **User Action (Browser)**: Pengguna berinteraksi dengan antarmuka Next.js (mengisi form surat jalan, menekan tombol *Generate Prime*, atau memilih skenario serangan).
+2. **TanStack Query Mutation/Query**: Komponen React memanggil custom hook (misal: `useMutation({ mutationFn: issueGatePass })`). TanStack Query mengelola status `isPending`, `isError`, `data`, dan `error` secara reaktif di sisi client.
+3. **REST API Transmission**: `src/lib/api.ts` mengirim payload JSON ke FastAPI endpoint (misal: `http://localhost:8000/api/v1/pass/issue`).
+4. **Pydantic Validation**: FastAPI memvalidasi tipe data masukan menggunakan model Pydantic pada `backend/models/schemas.py`.
+5. **Core Computation**: Router memanggil modul `rsa_engine.py` (yang menggunakan `math_utils.py`, `primes.py`, `hashing.py`, dan `inspector.py`).
+6. **Response & Cache Update**: Hasil kalkulasi RSA dikembalikan sebagai response JSON. TanStack Query memperbarui state client dan memicu re-render UI secara instan.
 ---
 
 ## 3. Arsitektur Kriptografi Multi-Entitas
@@ -526,19 +525,34 @@ Untuk mencegah serangan penggunaan token bekas (*replay attack*), sistem mengimp
 - Dikodekan ke Base64 UTF-8:
   `token_base64 = base64.b64encode(compact_json.encode('utf-8')).decode('ascii')`
 - **Generasi QR Code**:
-  - Menggunakan library `qrcode` (jika tersedia di runtime) untuk merender gambar PNG/Tkinter Image.
-  - Sediakan fallback generator QR berbasis teks ASCII terminal jika dependensi grafis tidak ada.
+  - Frontend Next.js merender QR Code menggunakan library ringan React seperti `react-qr-code` atau `@techstark/opencv-js` / HTML5 Canvas (hanya untuk tampilan grafis, bukan komputasi kripto).
+
+### 8.3 Spesifikasi Kontrak REST API (FastAPI Backend)
+Seluruh pertukaran data antara Next.js dan FastAPI dilakukan melalui endpoint berikut:
+
+| Method | Endpoint | Fungsi | Request Body | Response Body |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/keys/generate` | Pembangkitan kunci otomatis | `{"bits": 32, "entity": "A"}` | `{"pub_key": [e, n], "priv_key": [d, n], "p": p, "q": q, "phi": phi}` |
+| `POST` | `/api/v1/keys/validate` | Validasi kunci manual $p, q, e$ | `{"p": 47, "q": 71, "e": 79}` | `{"valid": true, "n": 3337, "phi": 3220, "d": 1019, "msg": "OK"}` |
+| `POST` | `/api/v1/inspect/trace` | Eksekusi trace algoritma | `{"algorithm": "eea", "params": {...}}` | `{"algorithm": "eea", "steps": [...], "result": ...}` |
+| `POST` | `/api/v1/pass/issue` | PPIC menerbitkan & sign | `{"manifest": {...}, "priv_key_a": [...], "pub_key_c": [...]}` | `{"token_base64": "...", "package": {...}}` |
+| `POST` | `/api/v1/pass/gate-verify` | Satpam cek integritas | `{"token_base64": "...", "pub_key_a": [...]}` | `{"valid": true, "manifest": {...}, "is_replayed": false}` |
+| `POST` | `/api/v1/pass/gate-clearance`| Satpam counter-sign | `{"token_base64": "...", "priv_key_b": [...], "officer_id": "..."}` | `{"updated_token_base64": "...", "clearance": {...}}` |
+| `POST` | `/api/v1/pass/receive` | Cabang verify & decrypt | `{"token_base64": "...", "pub_key_a": [...], "pub_key_b": [...], "priv_key_c": [...]}` | `{"valid_a": true, "valid_b": true, "decrypted_secret": "..."}` |
+| `POST` | `/api/v1/attack/simulate` | Lab simulasi exploit | `{"attack_type": "tamper", "token_base64": "...", "modifications": {...}}` | `{"status": "TAMPERED", "error_code": "HASH_MISMATCH", "details": {...}}` |
 
 ---
 
-## 9. Desain UI per View
+## 9. Desain Frontend Web (Next.js App Router & TanStack Query)
 
-Antarmuka pengguna diatur menjadi navigasi multi-tab yang teratur.
+Antarmuka pengguna diatur menjadi navigasi modern Next.js App Router dengan Client-Side Fetching (CSF) via TanStack Query.
 
-### 9.1 `keygen_view.py`
-- **Komponen**: Radio button entitas (A, B, C), input manual $p, q, e$, tombol "Generate Random Prime", tombol "Hitung Keypair", panel detail parameter ($n, \phi(n), d$).
-- **State**: `selected_entity`, `p_val`, `q_val`, `e_val`, `computed_keys`.
-- **Wireframe**:
+### 9.1 `src/app/keygen/page.tsx`
+- **Komponen**: Card pemilih entitas (A: PPIC, B: Satpam, C: Gudang), dropdown ukuran bit, input form manual $p, q, e$, tombol "Generate Random Prime", tombol "Hitung Keypair", badges status parameter.
+- **TanStack Query Hooks**:
+  - `useMutation({ mutationFn: api.generateKeypair })`
+  - `useMutation({ mutationFn: api.validateKeypair })`
+- **State Client**: `activeEntity`, `keyCache` (disimpan pada React Context / Zustand / LocalStorage agar persisten antar-tab).
 ```
 +-------------------------------------------------------------+
 | [Tab: Key Management]                                       |
