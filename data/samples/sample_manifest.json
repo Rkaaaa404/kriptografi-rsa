@@ -1,0 +1,36 @@
+{
+  "pass_id": "SP-20241021-0089",
+  "timestamp": "2024-10-21T08:30:00Z",
+  "valid_until": "2024-10-21T20:00:00Z",
+  "issuer_entity": "Entity-A-PPIC",
+  "origin": "Pabrik Utama PT Sinar Baja Karawang (Plant 01)",
+  "destination": "Gudang Distribusi Cakung Blok C-4 Jakarta Timur",
+  "vehicle_plate": "B 9482 KXY",
+  "driver_name": "Bambang Sudarsono",
+  "item_list": [
+    {
+      "sku": "RAW-STL-001",
+      "name": "Baja Canai Dingin (Cold Rolled Coil) SPCC-SD 1.2mm x 1200mm",
+      "qty": 15,
+      "unit": "roll"
+    },
+    {
+      "sku": "CMP-BLT-012",
+      "name": "High-Tensile Hex Head Structural Bolt Grade 8.8 M16x50",
+      "qty": 2500,
+      "unit": "pcs"
+    },
+    {
+      "sku": "ALM-SHT-044",
+      "name": "Plat Aluminium Alloy 5052-H32 Tebal 2.0mm (1220 x 2440mm)",
+      "qty": 80,
+      "unit": "lembar"
+    },
+    {
+      "sku": "CSG-WIR-008",
+      "name": "Kawat Las MIG ER70S-6 Diameter 1.2mm (Spool 15kg)",
+      "qty": 50,
+      "unit": "spool"
+    }
+  ]
+}

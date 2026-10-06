@@ -1,0 +1,96 @@
+{
+  "academic_reference": {
+    "description": "Contoh perhitungan manual akademis tugas kuliah Kriptografi (Bab 3 Laporan: p=47, q=71, e=79)",
+    "p": 47,
+    "q": 71,
+    "n": 3337,
+    "phi": 3220,
+    "e": 79,
+    "d": 1019,
+    "pub_key": [
+      79,
+      3337
+    ],
+    "priv_key": [
+      1019,
+      3337
+    ],
+    "bit_length": 12
+  },
+  "entity_a_ppic": {
+    "entity_name": "Entity A - PPIC / Manajer Logistik Pabrik",
+    "role": "Issuer & Primary Signer Surat Jalan",
+    "p": 2965629853,
+    "q": 3512210077,
+    "n": 10415915054358628681,
+    "phi": 10415915047880788752,
+    "e": 65537,
+    "d": 7103934736258533281,
+    "pub_key": [
+      65537,
+      10415915054358628681
+    ],
+    "priv_key": [
+      7103934736258533281,
+      10415915054358628681
+    ],
+    "bit_length": 64
+  },
+  "entity_b_gate": {
+    "entity_name": "Entity B - Pos Keamanan Gerbang (Gate Officer)",
+    "role": "Verifier & Clearance Counter-Signer",
+    "p": 3030705913,
+    "q": 3445704799,
+    "n": 10442917908781776487,
+    "phi": 10442917902305365776,
+    "e": 65537,
+    "d": 4205243547305200241,
+    "pub_key": [
+      65537,
+      10442917908781776487
+    ],
+    "priv_key": [
+      4205243547305200241,
+      10442917908781776487
+    ],
+    "bit_length": 64
+  },
+  "entity_c_warehouse": {
+    "entity_name": "Entity C - Gudang Distribusi Tujuan (Destination)",
+    "role": "Final Dual Verifier & Secret Decryptor",
+    "p": 3625756891,
+    "q": 3927791519,
+    "n": 14241217166425607429,
+    "phi": 14241217158872059020,
+    "e": 65537,
+    "d": 9340223646791853653,
+    "pub_key": [
+      65537,
+      14241217166425607429
+    ],
+    "priv_key": [
+      9340223646791853653,
+      14241217166425607429
+    ],
+    "bit_length": 64
+  },
+  "rogue_adversary": {
+    "entity_name": "Rogue Entity - Attacker / Penyerang Palsu",
+    "role": "Simulated Rogue Signer untuk Attack Lab",
+    "p": 2601411427,
+    "q": 2378603303,
+    "n": 6187725812724143381,
+    "phi": 6187725807744128652,
+    "e": 65537,
+    "d": 3375080251604885285,
+    "pub_key": [
+      65537,
+      6187725812724143381
+    ],
+    "priv_key": [
+      3375080251604885285,
+      6187725812724143381
+    ],
+    "bit_length": 63
+  }
+}
