@@ -163,28 +163,28 @@ export default function InspectorPage() {
   const chunkInfo = computeChunking()
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8 text-left">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8 text-left">
       {/* Page Header */}
-      <div className="border-b border-zinc-200/80 pb-5">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold uppercase tracking-wider mb-2">
+      <div className="border-b border-slate-200/80 pb-6">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-[#008579] text-xs font-semibold uppercase tracking-wider mb-2">
           <Binary className="w-3.5 h-3.5" /> Arithmetic Debugger
         </div>
-        <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
           Crypto Inspector &amp; Arithmetic Trace
         </h1>
-        <p className="text-sm text-zinc-600 mt-1 max-w-2xl">
+        <p className="text-sm text-slate-600 mt-1 max-w-2xl">
           Visualisasi langkah-demi-langkah modular arithmetic RSA dari implementasi scratch Python murni (0% library eksternal).
         </p>
       </div>
 
       {/* Tabs navigation */}
-      <div className="flex border-b border-zinc-200 gap-1 overflow-x-auto pb-1 text-xs">
+      <div className="flex bg-slate-100/90 p-1.5 rounded-2xl gap-1.5 overflow-x-auto text-xs font-semibold">
         <button
           onClick={() => setActiveTab('eea')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap ${
             activeTab === 'eea'
-              ? 'bg-zinc-900 text-white shadow-subtle'
-              : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
+              ? 'bg-[#081c26] text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
         >
           <Calculator className="w-3.5 h-3.5" />
@@ -193,10 +193,10 @@ export default function InspectorPage() {
 
         <button
           onClick={() => setActiveTab('miller_rabin')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap ${
             activeTab === 'miller_rabin'
-              ? 'bg-zinc-900 text-white shadow-subtle'
-              : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
+              ? 'bg-[#081c26] text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
         >
           <ShieldCheck className="w-3.5 h-3.5" />
@@ -205,10 +205,10 @@ export default function InspectorPage() {
 
         <button
           onClick={() => setActiveTab('mod_exp')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap ${
             activeTab === 'mod_exp'
-              ? 'bg-zinc-900 text-white shadow-subtle'
-              : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
+              ? 'bg-[#081c26] text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
         >
           <Zap className="w-3.5 h-3.5" />
@@ -217,10 +217,10 @@ export default function InspectorPage() {
 
         <button
           onClick={() => setActiveTab('chunking')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap ${
             activeTab === 'chunking'
-              ? 'bg-zinc-900 text-white shadow-subtle'
-              : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
+              ? 'bg-[#081c26] text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
@@ -231,7 +231,7 @@ export default function InspectorPage() {
       {/* TAB 1: EXTENDED EUCLIDEAN ALGORITHM */}
       {activeTab === 'eea' && (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-card space-y-4">
+          <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-finpay space-y-4">
             <div>
               <h2 className="text-base font-bold text-zinc-900 flex items-center gap-2">
                 <Calculator className="w-4 h-4 text-zinc-700" />

@@ -1,37 +1,45 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 
 export function CryptographicMesh3D() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [webGlSupported, setWebGlSupported] = useState(true)
 
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
-    const width = container.clientWidth || 320
-    const height = container.clientHeight || 320
+    const width = container.clientWidth || 360
+    const height = container.clientHeight || 360
 
-    // Scene, Camera, Renderer
+    // Scene, Camera
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000)
     camera.position.z = 5.2
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
-    renderer.setSize(width, height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    container.appendChild(renderer.domElement)
+    let renderer: THREE.WebGLRenderer | null = null
+    try {
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'default' })
+      renderer.setSize(width, height)
+      renderer.setPixelRatio(Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 2))
+      container.appendChild(renderer.domElement)
+    } catch (err) {
+      console.warn('WebGL initialization failed, falling back gracefully:', err)
+      setWebGlSupported(false)
+      return
+    }
 
     // Geometric Group
     const group = new THREE.Group()
     scene.add(group)
 
     // Outer Polyhedron Wireframe (Cryptographic Key Vault Symbol)
-    const geometry = new THREE.IcosahedronGeometry(1.8, 1)
+    const geometry = new THREE.IcosahedronGeometry(1.85, 1)
     const wireframe = new THREE.WireframeGeometry(geometry)
     const lineMaterial = new THREE.LineBasicMaterial({
-      color: 0x71717a, // Subtle zinc-500
+      color: 0x008579, // Finpay Teal accent
       transparent: true,
       opacity: 0.35,
     })
@@ -39,23 +47,23 @@ export function CryptographicMesh3D() {
     group.add(lines)
 
     // Inner Core (Small Rotating Polyhedron)
-    const innerGeometry = new THREE.OctahedronGeometry(0.9, 0)
+    const innerGeometry = new THREE.OctahedronGeometry(0.95, 0)
     const innerWireframe = new THREE.WireframeGeometry(innerGeometry)
     const innerMaterial = new THREE.LineBasicMaterial({
-      color: 0x18181b, // Deep zinc-900
+      color: 0x081c26, // Finpay Deep Navy
       transparent: true,
-      opacity: 0.7,
+      opacity: 0.75,
     })
     const innerLines = new THREE.LineSegments(innerWireframe, innerMaterial)
     group.add(innerLines)
 
     // Floating Cryptographic Nodes (Points)
-    const nodeCount = 42
+    const nodeCount = 48
     const nodeGeometry = new THREE.BufferGeometry()
     const nodePositions = new Float32Array(nodeCount * 3)
 
     for (let i = 0; i < nodeCount * 3; i += 3) {
-      const radius = 1.8 + (Math.random() - 0.5) * 0.4
+      const radius = 1.85 + (Math.random() - 0.5) * 0.4
       const theta = Math.random() * Math.PI * 2
       const phi = Math.acos(2 * Math.random() - 1)
       nodePositions[i] = radius * Math.sin(phi) * Math.cos(theta)
@@ -65,10 +73,10 @@ export function CryptographicMesh3D() {
 
     nodeGeometry.setAttribute('position', new THREE.BufferAttribute(nodePositions, 3))
     const nodeMaterial = new THREE.PointsMaterial({
-      color: 0x18181b,
-      size: 0.05,
+      color: 0x008579,
+      size: 0.06,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
     })
     const nodes = new THREE.Points(nodeGeometry, nodeMaterial)
     group.add(nodes)
@@ -81,8 +89,8 @@ export function CryptographicMesh3D() {
 
     const handleMouseMove = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width - 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5
+      const x = (e.clientX - rect.left) / (rect.width || 1) - 0.5
+      const y = (e.clientY - rect.top) / (rect.height || 1) - 0.5
       targetX = x * 0.8
       targetY = y * 0.8
     }
@@ -105,16 +113,18 @@ export function CryptographicMesh3D() {
       innerLines.rotation.x -= 0.005
       innerLines.rotation.y -= 0.005
 
-      renderer.render(scene, camera)
+      if (renderer) {
+        renderer.render(scene, camera)
+      }
     }
 
     animate()
 
     // Resize Observer
     const handleResize = () => {
-      if (!container) return
-      const newW = container.clientWidth
-      const newH = container.clientHeight
+      if (!container || !renderer) return
+      const newW = container.clientWidth || 360
+      const newH = container.clientHeight || 360
       camera.aspect = newW / newH
       camera.updateProjectionMatrix()
       renderer.setSize(newW, newH)
@@ -126,9 +136,16 @@ export function CryptographicMesh3D() {
       cancelAnimationFrame(animationFrameId)
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('resize', handleResize)
-      renderer.dispose()
-      if (container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement)
+      if (renderer) {
+        try {
+          renderer.dispose()
+          renderer.forceContextLoss()
+          if (container && renderer.domElement && container.contains(renderer.domElement)) {
+            container.removeChild(renderer.domElement)
+          }
+        } catch {
+          // ignore cleanup issues
+        }
       }
     }
   }, [])
@@ -136,7 +153,13 @@ export function CryptographicMesh3D() {
   return (
     <div
       ref={containerRef}
-      className="w-full h-64 sm:h-80 md:h-96 relative flex items-center justify-center pointer-events-none select-none"
-    />
+      className="w-full h-72 sm:h-88 md:h-96 relative flex items-center justify-center select-none animate-scale-in"
+    >
+      {!webGlSupported && (
+        <div className="text-center p-6 text-xs text-slate-400 font-mono">
+          [Cryptographic Mesh: WebGL Disabled in Environment]
+        </div>
+      )}
+    </div>
   )
 }

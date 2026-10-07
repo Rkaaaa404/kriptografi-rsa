@@ -117,37 +117,37 @@ function AttackLabContent() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8 text-left">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8 text-left">
       {/* Header */}
       <div>
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold uppercase tracking-wider mb-2">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold uppercase tracking-wider mb-2">
           <Flame className="w-3.5 h-3.5" /> Cyber Attack Simulation Lab
         </div>
-        <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">Kriptanalisis &amp; Pengujian Serangan</h1>
-        <p className="text-zinc-600 text-sm mt-1 max-w-2xl">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Kriptanalisis &amp; Pengujian Serangan</h1>
+        <p className="text-slate-600 text-sm mt-1 max-w-2xl">
           Uji ketahanan matematis RSA terhadap manipulasi muatan (TC-03), penandatangan palsu (TC-04), kerusakan bit signature
           (TC-05), dan serangan replay token bekas (TC-06).
         </p>
       </div>
 
       {/* Target Token Input Bar */}
-      <div className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-subtle space-y-3">
+      <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-finpay space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <label className="text-xs font-semibold text-zinc-700 flex items-center gap-1.5">
-            <Binary className="w-3.5 h-3.5 text-zinc-500" />
+          <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+            <Binary className="w-3.5 h-3.5 text-[#008579]" />
             Target Token Surat Jalan (Base64)
           </label>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePasteLastToken}
-              className="text-xs px-2.5 py-1 rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 flex items-center gap-1 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 transition-colors font-semibold"
             >
-              <ClipboardPaste className="w-3.5 h-3.5" />
+              <ClipboardPaste className="w-3.5 h-3.5 text-[#008579]" />
               <span>Muat Token Pipeline Aktif</span>
             </button>
             <Link
               href="/"
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+              className="text-xs text-[#008579] hover:underline font-semibold flex items-center gap-1"
             >
               Buka Pipeline <ArrowRight className="w-3 h-3" />
             </Link>
@@ -159,27 +159,27 @@ function AttackLabContent() {
           value={tokenInput}
           onChange={(e) => setTokenInput(e.target.value)}
           placeholder="Paste string Base64 GatePassPackage di sini..."
-          className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-[11px] text-zinc-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+          className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 bg-slate-50 font-mono text-[11px] text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#008579]"
         />
 
-        <div className="flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+        <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
           <span>Verifikasi Public Key PPIC: e={pubKeyA[0]}, n={pubKeyA[1]}</span>
           <span>{tokenInput ? `${tokenInput.length} karakter` : 'Belum ada token'}</span>
         </div>
       </div>
 
       {/* Scenario Selection Tabs */}
-      <div className="rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-card space-y-6">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-finpay space-y-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           <button
             onClick={() => {
               setActiveTab('tamper')
               setResult(null)
             }}
-            className={`p-3 rounded-xl text-left border transition-all ${
+            className={`p-3.5 rounded-2xl text-left border transition-all ${
               activeTab === 'tamper'
-                ? 'border-zinc-900 bg-zinc-900 text-white shadow-subtle'
-                : 'border-zinc-200 bg-zinc-50/50 hover:bg-zinc-100/60 text-zinc-700'
+                ? 'border-[#081c26] bg-[#081c26] text-white shadow-sm'
+                : 'border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 text-slate-700'
             }`}
           >
             <div className="text-[11px] font-mono opacity-70">TC-03</div>
@@ -192,10 +192,10 @@ function AttackLabContent() {
               setActiveTab('rogue_signer')
               setResult(null)
             }}
-            className={`p-3 rounded-xl text-left border transition-all ${
+            className={`p-3.5 rounded-2xl text-left border transition-all ${
               activeTab === 'rogue_signer'
-                ? 'border-zinc-900 bg-zinc-900 text-white shadow-subtle'
-                : 'border-zinc-200 bg-zinc-50/50 hover:bg-zinc-100/60 text-zinc-700'
+                ? 'border-[#081c26] bg-[#081c26] text-white shadow-sm'
+                : 'border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 text-slate-700'
             }`}
           >
             <div className="text-[11px] font-mono opacity-70">TC-04</div>
@@ -208,10 +208,10 @@ function AttackLabContent() {
               setActiveTab('corrupt_sig')
               setResult(null)
             }}
-            className={`p-3 rounded-xl text-left border transition-all ${
+            className={`p-3.5 rounded-2xl text-left border transition-all ${
               activeTab === 'corrupt_sig'
-                ? 'border-zinc-900 bg-zinc-900 text-white shadow-subtle'
-                : 'border-zinc-200 bg-zinc-50/50 hover:bg-zinc-100/60 text-zinc-700'
+                ? 'border-[#081c26] bg-[#081c26] text-white shadow-sm'
+                : 'border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 text-slate-700'
             }`}
           >
             <div className="text-[11px] font-mono opacity-70">TC-05</div>
@@ -224,10 +224,10 @@ function AttackLabContent() {
               setActiveTab('replay')
               setResult(null)
             }}
-            className={`p-3 rounded-xl text-left border transition-all ${
+            className={`p-3.5 rounded-2xl text-left border transition-all ${
               activeTab === 'replay'
-                ? 'border-zinc-900 bg-zinc-900 text-white shadow-subtle'
-                : 'border-zinc-200 bg-zinc-50/50 hover:bg-zinc-100/60 text-zinc-700'
+                ? 'border-[#081c26] bg-[#081c26] text-white shadow-sm'
+                : 'border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 text-slate-700'
             }`}
           >
             <div className="text-[11px] font-mono opacity-70">TC-06</div>
@@ -237,7 +237,7 @@ function AttackLabContent() {
         </div>
 
         {/* Tab Specific Configuration */}
-        <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200/70 space-y-4">
+        <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200/70 space-y-4">
           {activeTab === 'tamper' && (
             <div className="space-y-3">
               <div className="text-xs font-semibold text-zinc-800">

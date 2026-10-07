@@ -50,13 +50,13 @@ export function WaybillPassSheet({
 
   if (!pkg) {
     return (
-      <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50/50 p-8 sm:p-12 text-center text-zinc-400 space-y-3">
-        <div className="w-12 h-12 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center mx-auto text-zinc-400">
-          <FileText className="w-6 h-6" />
+      <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50/60 p-8 sm:p-12 text-center text-slate-400 space-y-3">
+        <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center mx-auto text-slate-400 shadow-sm">
+          <FileText className="w-6 h-6 text-[#008579]" />
         </div>
         <div>
-          <h4 className="text-sm font-semibold text-zinc-700">Belum Ada Surat Jalan Terbit</h4>
-          <p className="text-xs text-zinc-500 max-w-sm mx-auto mt-1">
+          <h4 className="text-sm font-bold text-slate-800">Belum Ada Surat Jalan Terbit</h4>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
             Lengkapi formulir di Tahap 1 (PPIC) lalu tekan &quot;Terbitkan &amp; Tandatangani&quot; untuk menggenerasi dokumen fisik digital.
           </p>
         </div>
@@ -67,9 +67,9 @@ export function WaybillPassSheet({
   const { header, primary_signature, clearance, encrypted_secret, nonce } = pkg
 
   return (
-    <div className="relative rounded-2xl border border-zinc-200/90 bg-white p-6 sm:p-8 shadow-card overflow-hidden text-left">
+    <div className="relative rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-finpay overflow-hidden text-left animate-scale-in">
       {/* Decorative top security pattern */}
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-zinc-800 via-zinc-600 to-zinc-800" />
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#008579] via-teal-400 to-[#081c26]" />
 
       {/* Header document */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-zinc-100">
@@ -157,7 +157,7 @@ export function WaybillPassSheet({
         </div>
 
         {stepStatus.isReceived && decryptedSecret ? (
-          <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200 text-xs text-emerald-950 font-medium">
+          <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200 text-xs text-emerald-950 font-medium animate-scale-in">
             <div className="text-[10px] text-emerald-700 uppercase font-mono tracking-wider font-semibold mb-1">
               Plaintext Terdekripsi (Kunci Privat C):
             </div>

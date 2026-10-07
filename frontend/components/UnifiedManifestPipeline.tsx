@@ -330,83 +330,83 @@ export function UnifiedManifestPipeline() {
   return (
     <div className="space-y-8">
       {/* Interactive Stepper Navigation Bar */}
-      <div className="rounded-2xl border border-zinc-200/90 bg-white p-3 shadow-subtle flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="grid grid-cols-3 w-full sm:w-auto gap-2">
+      <div className="rounded-3xl border border-slate-200/80 bg-white p-3.5 shadow-finpay flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="grid grid-cols-3 w-full sm:w-auto gap-2.5">
           {/* Step 1 Pill */}
           <button
             onClick={() => setCurrentStep(1)}
-            className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-medium transition-all text-left ${
+            className={`flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all text-left ${
               currentStep === 1
-                ? 'bg-zinc-900 text-white shadow-subtle'
-                : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                ? 'bg-[#081c26] text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
             <div
-              className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-mono ${
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold ${
                 currentStep === 1
-                  ? 'bg-zinc-800 text-white'
+                  ? 'bg-[#008579] text-white'
                   : stepStatus.isIssued
-                  ? 'bg-emerald-100 text-emerald-800 font-bold'
-                  : 'bg-zinc-100 text-zinc-500'
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'bg-slate-100 text-slate-500'
               }`}
             >
-              {stepStatus.isIssued ? <Check className="w-3 h-3 text-emerald-800" /> : '1'}
+              {stepStatus.isIssued ? <Check className="w-3.5 h-3.5 text-emerald-800" /> : '1'}
             </div>
             <div>
-              <div className="font-semibold">PPIC</div>
-              <div className="text-[10px] opacity-70 hidden md:block">Penerbitan &amp; Sign</div>
+              <div className="font-bold">PPIC</div>
+              <div className="text-[10px] opacity-75 hidden md:block">Penerbitan &amp; Sign</div>
             </div>
           </button>
 
           {/* Step 2 Pill */}
           <button
             onClick={() => setCurrentStep(2)}
-            className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-medium transition-all text-left ${
+            className={`flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all text-left ${
               currentStep === 2
-                ? 'bg-zinc-900 text-white shadow-subtle'
-                : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                ? 'bg-[#081c26] text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
             <div
-              className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-mono ${
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold ${
                 currentStep === 2
-                  ? 'bg-zinc-800 text-white'
+                  ? 'bg-[#008579] text-white'
                   : stepStatus.isGateCleared
-                  ? 'bg-emerald-100 text-emerald-800 font-bold'
-                  : 'bg-zinc-100 text-zinc-500'
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'bg-slate-100 text-slate-500'
               }`}
             >
-              {stepStatus.isGateCleared ? <Check className="w-3 h-3 text-emerald-800" /> : '2'}
+              {stepStatus.isGateCleared ? <Check className="w-3.5 h-3.5 text-emerald-800" /> : '2'}
             </div>
             <div>
-              <div className="font-semibold">Pos Gerbang</div>
-              <div className="text-[10px] opacity-70 hidden md:block">Periksa &amp; Counter-Sign</div>
+              <div className="font-bold">Pos Gerbang</div>
+              <div className="text-[10px] opacity-75 hidden md:block">Periksa &amp; Counter-Sign</div>
             </div>
           </button>
 
           {/* Step 3 Pill */}
           <button
             onClick={() => setCurrentStep(3)}
-            className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-medium transition-all text-left ${
+            className={`flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all text-left ${
               currentStep === 3
-                ? 'bg-zinc-900 text-white shadow-subtle'
-                : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                ? 'bg-[#081c26] text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
             <div
-              className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-mono ${
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold ${
                 currentStep === 3
-                  ? 'bg-zinc-800 text-white'
+                  ? 'bg-[#008579] text-white'
                   : stepStatus.isReceived
-                  ? 'bg-emerald-100 text-emerald-800 font-bold'
-                  : 'bg-zinc-100 text-zinc-500'
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'bg-slate-100 text-slate-500'
               }`}
             >
-              {stepStatus.isReceived ? <Check className="w-3 h-3 text-emerald-800" /> : '3'}
+              {stepStatus.isReceived ? <Check className="w-3.5 h-3.5 text-emerald-800" /> : '3'}
             </div>
             <div>
-              <div className="font-semibold">Gudang Penerima</div>
-              <div className="text-[10px] opacity-70 hidden md:block">Dual-Verify &amp; Dekripsi</div>
+              <div className="font-bold">Gudang Penerima</div>
+              <div className="text-[10px] opacity-75 hidden md:block">Dual-Verify &amp; Dekripsi</div>
             </div>
           </button>
         </div>
@@ -414,10 +414,10 @@ export function UnifiedManifestPipeline() {
         {/* Action: Reset cycle */}
         <button
           onClick={handleResetLifecycle}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
           title="Reset alur dan buat surat jalan baru"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
+          <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
           <span className="hidden sm:inline">Reset Siklus</span>
         </button>
       </div>
@@ -428,14 +428,14 @@ export function UnifiedManifestPipeline() {
         <div className="lg:col-span-7 space-y-6">
           {/* STEP 1: PPIC Form */}
           {currentStep === 1 && (
-            <div className="rounded-2xl border border-zinc-200/90 bg-white p-6 sm:p-8 shadow-card space-y-6 text-left">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-100">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-finpay space-y-6 text-left animate-fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div>
-                  <span className="text-[11px] font-mono uppercase font-semibold text-blue-600 tracking-wider">
+                  <span className="text-xs font-mono uppercase font-bold text-[#008579] tracking-wider">
                     Tahap 1 &bull; Entitas A
                   </span>
-                  <h3 className="text-xl font-bold text-zinc-900 mt-0.5">Penerbitan Surat Jalan (PPIC)</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">
+                  <h3 className="text-xl font-extrabold text-slate-900 mt-0.5">Penerbitan Surat Jalan (PPIC)</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
                     Buat manifest pengiriman, tandatangani dengan Kunci Privat A, dan enkripsi catatan rahasia dengan Kunci Publik C.
                   </p>
                 </div>
@@ -443,7 +443,7 @@ export function UnifiedManifestPipeline() {
                   <button
                     type="button"
                     onClick={handleLoadSampleData}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold transition-colors"
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-[#008579] text-xs font-semibold transition-colors"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Isi Contoh Demo</span>
@@ -451,7 +451,7 @@ export function UnifiedManifestPipeline() {
                   <button
                     type="button"
                     onClick={handleClearForm}
-                    className="px-2.5 py-1.5 rounded-xl border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 text-xs font-medium transition-colors"
+                    className="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-xs font-semibold transition-colors"
                   >
                     Reset Form
                   </button>
@@ -621,9 +621,9 @@ export function UnifiedManifestPipeline() {
                 <button
                   onClick={handleIssuePass}
                   disabled={isIssuing}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-xs transition-colors shadow-subtle disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-[#081c26] hover:bg-[#008579] text-white font-semibold text-xs sm:text-sm transition-all shadow-sm hover-lift active:scale-[0.98] disabled:opacity-50"
                 >
-                  <Sparkles className={`w-4 h-4 ${isIssuing ? 'animate-spin' : ''}`} />
+                  <Sparkles className={`w-4 h-4 text-teal-300 ${isIssuing ? 'animate-spin' : ''}`} />
                   <span>
                     {isIssuing
                       ? 'Menghitung Hash & Menandatangani...'
@@ -636,18 +636,18 @@ export function UnifiedManifestPipeline() {
 
           {/* STEP 2: Gate Security Verification & Clearance */}
           {currentStep === 2 && (
-            <div className="rounded-2xl border border-zinc-200/90 bg-white p-6 sm:p-8 shadow-card space-y-6 text-left">
-              <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-finpay space-y-6 text-left animate-fade-in">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div>
-                  <span className="text-[11px] font-mono uppercase font-semibold text-emerald-600 tracking-wider">
+                  <span className="text-xs font-mono uppercase font-bold text-emerald-600 tracking-wider">
                     Tahap 2 &bull; Entitas B
                   </span>
-                  <h3 className="text-xl font-bold text-zinc-900 mt-0.5">Pemeriksaan Pos Gerbang</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">
+                  <h3 className="text-xl font-extrabold text-slate-900 mt-0.5">Pemeriksaan Pos Gerbang</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
                     Petugas satpam memverifikasi keaslian signature PPIC dan membubuhkan counter-sign approval.
                   </p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700">
+                <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-700">
                   <DoorOpen className="w-5 h-5" />
                 </div>
               </div>
@@ -746,9 +746,9 @@ export function UnifiedManifestPipeline() {
                 <button
                   onClick={handleGateClearance}
                   disabled={isClearingGate || !tokenBase64}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-xs transition-colors shadow-subtle disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-[#081c26] hover:bg-[#008579] text-white font-semibold text-xs sm:text-sm transition-all shadow-sm hover-lift active:scale-[0.98] disabled:opacity-50"
                 >
-                  <ShieldCheck className={`w-4 h-4 ${isClearingGate ? 'animate-spin' : ''}`} />
+                  <ShieldCheck className={`w-4 h-4 text-emerald-300 ${isClearingGate ? 'animate-spin' : ''}`} />
                   <span>
                     {isClearingGate
                       ? 'Membubuhkan Counter-Signature Satpam...'
@@ -763,44 +763,44 @@ export function UnifiedManifestPipeline() {
 
           {/* STEP 3: Warehouse Receiving & Secret Decryption */}
           {currentStep === 3 && (
-            <div className="rounded-2xl border border-zinc-200/90 bg-white p-6 sm:p-8 shadow-card space-y-6 text-left">
-              <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-finpay space-y-6 text-left animate-fade-in">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div>
-                  <span className="text-[11px] font-mono uppercase font-semibold text-purple-600 tracking-wider">
+                  <span className="text-xs font-mono uppercase font-bold text-teal-600 tracking-wider">
                     Tahap 3 &bull; Entitas C
                   </span>
-                  <h3 className="text-xl font-bold text-zinc-900 mt-0.5">Penerimaan Gudang Tujuan</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">
+                  <h3 className="text-xl font-extrabold text-slate-900 mt-0.5">Penerimaan Gudang Tujuan</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
                     Gudang memverifikasi keabsahan kedua tanda tangan (PPIC &amp; Gerbang) lalu mendekripsi memo rahasia pengiriman.
                   </p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-purple-50 text-purple-700">
+                <div className="p-3 rounded-2xl bg-teal-50 text-[#008579]">
                   <Package className="w-5 h-5" />
                 </div>
               </div>
 
               {/* Status Verification Checklist */}
               <div className="space-y-2 text-xs">
-                <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 border border-zinc-200/70">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-500" />
-                    <span className="font-medium text-zinc-800">Tanda Tangan PPIC (Entity A)</span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                    <span className="font-semibold text-slate-800">Tanda Tangan PPIC (Entity A)</span>
                   </div>
-                  <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold">
+                  <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full font-semibold border border-emerald-200/60">
                     {stepStatus.isIssued ? 'Otentik' : 'Belum Ada'}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 border border-zinc-200/70">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="font-medium text-zinc-800">Persetujuan Gerbang (Entity B)</span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <span className="font-semibold text-slate-800">Persetujuan Gerbang (Entity B)</span>
                   </div>
                   <span
-                    className={`text-[11px] font-mono px-2 py-0.5 rounded font-semibold ${
+                    className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full font-semibold border ${
                       stepStatus.isGateCleared
-                        ? 'text-emerald-700 bg-emerald-50'
-                        : 'text-amber-700 bg-amber-50'
+                        ? 'text-emerald-700 bg-emerald-50 border-emerald-200/60'
+                        : 'text-amber-700 bg-amber-50 border-amber-200/60'
                     }`}
                   >
                     {stepStatus.isGateCleared ? 'Clearance Sah' : 'Menunggu Gerbang'}
@@ -810,12 +810,12 @@ export function UnifiedManifestPipeline() {
 
               {/* Decrypted Secret Result */}
               {receiveResult?.decrypted_secret && (
-                <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-1.5 text-xs text-left">
-                  <div className="flex items-center gap-1.5 text-emerald-800 font-semibold">
+                <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-200 space-y-2 text-xs text-left animate-scale-in">
+                  <div className="flex items-center gap-2 text-emerald-900 font-bold text-sm">
                     <Unlock className="w-4 h-4 text-emerald-600" />
                     <span>Catatan Rahasia Berhasil Didekripsi</span>
                   </div>
-                  <p className="font-mono text-emerald-950 font-medium select-all">
+                  <p className="font-mono text-emerald-950 font-semibold bg-white/80 p-3 rounded-xl border border-emerald-200/60 select-all text-xs sm:text-sm">
                     {receiveResult.decrypted_secret}
                   </p>
                 </div>
@@ -826,9 +826,9 @@ export function UnifiedManifestPipeline() {
                 <button
                   onClick={handleWarehouseReceive}
                   disabled={isReceiving || !tokenBase64}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-xs transition-colors shadow-subtle disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-[#081c26] hover:bg-[#008579] text-white font-semibold text-xs sm:text-sm transition-all shadow-sm hover-lift active:scale-[0.98] disabled:opacity-50"
                 >
-                  <Unlock className={`w-4 h-4 ${isReceiving ? 'animate-spin' : ''}`} />
+                  <Unlock className={`w-4 h-4 text-teal-300 ${isReceiving ? 'animate-spin' : ''}`} />
                   <span>
                     {isReceiving
                       ? 'Memverifikasi Ganda & Mendekripsi...'

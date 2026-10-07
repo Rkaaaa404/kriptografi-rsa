@@ -4,6 +4,10 @@ No external crypto libraries. All math is built from first principles
 using Python's arbitrary-precision int type.
 """
 
+from __future__ import annotations
+
+from collections.abc import Callable
+
 
 def gcd(a: int, b: int) -> int:
     """Compute the Greatest Common Divisor using the iterative Euclidean algorithm.
@@ -35,7 +39,7 @@ def gcd(a: int, b: int) -> int:
 def extended_euclidean(
     a: int,
     b: int,
-    trace_hook: callable | None = None,
+    trace_hook: Callable | None = None,
 ) -> tuple[int, int, int]:
     """Solve the Diophantine equation ``a*x + b*y = gcd(a, b)`` iteratively.
 
@@ -123,7 +127,7 @@ def extended_euclidean(
 def mod_inverse(
     e: int,
     phi: int,
-    trace_hook: callable | None = None,
+    trace_hook: Callable | None = None,
 ) -> int:
     """Compute the modular multiplicative inverse of *e* modulo *phi*.
 
@@ -165,7 +169,7 @@ def mod_exp(
     base: int,
     exp: int,
     mod: int,
-    trace_hook: callable | None = None,
+    trace_hook: Callable | None = None,
 ) -> int:
     """Compute ``(base ** exp) % mod`` using the Square-and-Multiply method.
 

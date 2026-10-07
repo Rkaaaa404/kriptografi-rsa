@@ -5,6 +5,9 @@ All randomness comes from the stdlib ``random`` module (seeded by the OS
 entropy source automatically on modern Python).
 """
 
+from __future__ import annotations
+
+from collections.abc import Callable
 import random
 import math
 
@@ -82,7 +85,7 @@ def is_prime_trial_division(n: int, limit: int = 10_000) -> bool:
 def miller_rabin(
     n: int,
     k: int = 20,
-    trace_hook: callable | None = None,
+    trace_hook: Callable | None = None,
 ) -> bool:
     """Probabilistic primality test using the Miller-Rabin algorithm.
 
@@ -207,7 +210,7 @@ def generate_prime_candidate(bits: int) -> int:
 def generate_prime(
     bits: int,
     k: int = 20,
-    trace_hook: callable | None = None,
+    trace_hook: Callable | None = None,
 ) -> int:
     """Generate a random prime of the requested bit length.
 
