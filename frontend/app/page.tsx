@@ -109,8 +109,8 @@ export default function HomePage() {
             </div>
             <h3 className="font-bold text-zinc-900 text-sm">PPIC (Entitas A)</h3>
             <p className="text-xs text-zinc-500 leading-relaxed">
-              Menerbitkan manifest barang, menghitung polynomial hash H(M), menandatangani secara digital dengan kunci privat
-              S_A = H(M)^d_A mod n_A, dan mengenkripsi memo rahasia dengan kunci publik penerima (e_C).
+              Menerbitkan manifest barang, menghitung polynomial hash H(M), menandatangani secara digital dengan kunci privat{' '}
+              <span className="font-mono text-zinc-800">S<sub>A</sub> = H(M)<sup>d<sub>A</sub></sup> mod n<sub>A</sub></span>, dan mengenkripsi memo rahasia dengan kunci publik penerima (<span className="font-mono text-zinc-800">e<sub>C</sub></span>).
             </p>
             <div className="pt-2 text-[11px] font-mono text-zinc-400">
               Ref Kuliah: p=47, q=71 &rarr; n=3337, e=79, d=1019
@@ -124,8 +124,9 @@ export default function HomePage() {
             </div>
             <h3 className="font-bold text-zinc-900 text-sm">Pos Gerbang (Entitas B)</h3>
             <p className="text-xs text-zinc-500 leading-relaxed">
-              Memeriksa keaslian signature pengirim S_A^e_A mod n_A ≟ H(M), memvalidasi masa berlaku,
-              memeriksa registry nonce anti-replay, dan membubuhkan persetujuan gerbang S_B.
+              Memeriksa keaslian signature pengirim{' '}
+              <span className="font-mono text-zinc-800">S<sub>A</sub><sup>e<sub>A</sub></sup> mod n<sub>A</sub> = H(M)</span>, memvalidasi masa berlaku,
+              memeriksa registry nonce anti-replay, dan membubuhkan persetujuan gerbang <span className="font-mono text-zinc-800">S<sub>B</sub></span>.
             </p>
             <div className="pt-2 text-[11px] font-mono text-zinc-400">
               Ref Kuliah: p=53, q=67 &rarr; n=3551, e=17, d=2825
@@ -139,8 +140,8 @@ export default function HomePage() {
             </div>
             <h3 className="font-bold text-zinc-900 text-sm">Gudang Penerima (Entitas C)</h3>
             <p className="text-xs text-zinc-500 leading-relaxed">
-              Memvalidasi tanda tangan ganda (S_A dan S_B) untuk memastikan kargo tidak diselundupkan, kemudian mendekripsi
-              catatan rahasia/kode segel kontainer dengan kunci privat d_C.
+              Memvalidasi tanda tangan ganda (<span className="font-mono text-zinc-800">S<sub>A</sub></span> dan <span className="font-mono text-zinc-800">S<sub>B</sub></span>) untuk memastikan kargo tidak diselundupkan, kemudian mendekripsi
+              catatan rahasia/kode segel kontainer dengan kunci privat <span className="font-mono text-zinc-800">d<sub>C</sub></span>.
             </p>
             <div className="pt-2 text-[11px] font-mono text-zinc-400">
               Ref Kuliah: p=61, q=73 &rarr; n=4453, e=47, d=1751

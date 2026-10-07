@@ -143,7 +143,7 @@ export function KeyringQuickSetup() {
               >
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5 text-zinc-700" />
-                  <span>Kunci Kuliah ($p=47, q=71, e=79$)</span>
+                  <span>Kunci Kuliah (p = 47, q = 71, e = 79)</span>
                 </div>
                 <span className="text-[10px] text-zinc-500">Rekomendasi</span>
               </button>

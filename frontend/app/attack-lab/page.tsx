@@ -331,7 +331,7 @@ function AttackLabContent() {
                 Simulasi Gangguan Transmisi / Bit Flipping pada Nilai Signature
               </div>
               <p className="text-xs text-zinc-500">
-                Nilai tanda tangan $S$ dirusak sebesar selisih $\Delta$. Karena RSA modulo, perubahan sekecil 1 bit akan
+                Nilai tanda tangan S dirusak sebesar selisih Δ. Karena aritmatika modulo RSA, perubahan sekecil 1 bit akan
                 menghasilkan nilai dekripsi yang jauh berbeda dari hash yang diharapkan.
               </p>
               <div className="max-w-xs">
@@ -392,13 +392,13 @@ function AttackLabContent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
                 <div className="p-2.5 rounded-lg bg-zinc-50 border border-zinc-100">
-                  <div className="text-zinc-500 text-[11px]">Hash Dokumen Dihitung: H(M&apos;) mod n</div>
+                  <div className="text-zinc-500 text-[11px]">Hash Dokumen Dihitung: H(M′) mod n</div>
                   <div className="font-bold text-zinc-900 mt-0.5">
                     {String(result.details?.computed_digest ?? 'N/A')}
                   </div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-zinc-50 border border-zinc-100">
-                  <div className="text-zinc-500 text-[11px]">Hash Dipulihkan dari Signature: S^e mod n</div>
+                  <div className="text-zinc-500 text-[11px]">Hash Dipulihkan dari Signature: S<sup>e</sup> mod n</div>
                   <div className="font-bold text-rose-700 mt-0.5">
                     {String(result.details?.recovered_digest_from_sig ?? result.details?.recovered_digest ?? 'N/A')}
                   </div>

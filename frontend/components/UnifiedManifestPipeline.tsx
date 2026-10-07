@@ -600,7 +600,7 @@ export function UnifiedManifestPipeline() {
                     <Lock className="w-3.5 h-3.5 text-zinc-500" />
                     Catatan Rahasia (Encrypted Secret Note)
                   </label>
-                  <span className="text-[11px] text-zinc-400">Terenkripsi Kunci Publik C (e_C)</span>
+                  <span className="text-[11px] text-zinc-400">Terenkripsi Kunci Publik C (e<sub>C</sub>)</span>
                 </div>
                 <p className="text-[11px] text-zinc-500 leading-relaxed bg-zinc-50/80 p-2.5 rounded-xl border border-zinc-200/60">
                   <Info className="w-3.5 h-3.5 inline mr-1 text-zinc-600" />
@@ -724,9 +724,13 @@ export function UnifiedManifestPipeline() {
                     </span>
                   </div>
                   <p className="text-[11px] opacity-90 leading-relaxed">
-                    {gateVerifyResult.valid
-                      ? 'Integritas muatan fisik terbukti secara matematis: H(M) cocok dengan signature S_A. Nonce belum pernah dipakai. Truk diizinkan keluar setelah diberi counter-sign.'
-                      : 'Perhatian: Nilai hash manifest tidak sesuai dengan signature primer atau token sudah pernah diproses.'}
+                    {gateVerifyResult.valid ? (
+                      <>
+                        Integritas muatan fisik terbukti secara matematis: H(M) cocok dengan signature S<sub>A</sub>. Nonce belum pernah dipakai. Truk diizinkan keluar setelah diberi counter-sign.
+                      </>
+                    ) : (
+                      'Perhatian: Nilai hash manifest tidak sesuai dengan signature primer atau token sudah pernah diproses.'
+                    )}
                   </p>
                   {gateVerifyResult.digest_expected !== undefined && (
                     <div className="font-mono text-[11px] pt-1 border-t border-emerald-200/60 text-zinc-600 flex items-center gap-4">
@@ -828,7 +832,9 @@ export function UnifiedManifestPipeline() {
                   <span>
                     {isReceiving
                       ? 'Memverifikasi Ganda & Mendekripsi...'
-                      : 'Verifikasi Ganda & Buka Catatan Rahasia (Kunci Privat C) →'}
+                      : (
+                        <>Verifikasi Ganda &amp; Buka Catatan Rahasia (Kunci Privat d<sub>C</sub>) →</>
+                      )}
                   </span>
                 </button>
               </div>

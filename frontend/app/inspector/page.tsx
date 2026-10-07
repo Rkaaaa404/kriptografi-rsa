@@ -238,8 +238,8 @@ export default function InspectorPage() {
                 Extended Euclidean Algorithm (EEA) Trace
               </h2>
               <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                Menghitung gcd(a, b) dan koefisien Bézout x, y sedemikian rupa sehingga a · x + b · y = gcd(a, b).
-                Dalam RSA: mencari invers perkalian modular d ≡ e⁻¹ mod φ(n).
+                Menghitung gcd(a, b) dan koefisien Bézout x, y sedemikian rupa sehingga a &times; x + b &times; y = gcd(a, b).
+                Dalam RSA: mencari invers perkalian modular d &equiv; e<sup>-1</sup> mod &phi;(n).
               </p>
             </div>
 
@@ -308,7 +308,7 @@ export default function InspectorPage() {
                     <div className="text-xl font-bold font-mono text-zinc-900 mt-1">{bezoutX}</div>
                   </div>
                   <div className="bg-emerald-50/70 p-4 rounded-xl border border-emerald-200">
-                    <span className="text-xs text-emerald-800 font-medium">Invers Modular d = e⁻¹ mod φ</span>
+                    <span className="text-xs text-emerald-800 font-medium">Invers Modular d &equiv; e<sup>-1</sup> mod &phi;(n)</span>
                     <div className="text-xl font-bold font-mono text-emerald-900 mt-1">{modInverseD}</div>
                   </div>
                 </div>
@@ -324,15 +324,15 @@ export default function InspectorPage() {
                         <tr>
                           <th className="px-3 py-2.5">Step</th>
                           <th className="px-3 py-2.5">q</th>
-                          <th className="px-3 py-2.5">r1 (old_r)</th>
-                          <th className="px-3 py-2.5">r2 (r)</th>
-                          <th className="px-3 py-2.5 text-blue-700">r (new)</th>
-                          <th className="px-3 py-2.5">x1 (old_s)</th>
-                          <th className="px-3 py-2.5">x2 (s)</th>
-                          <th className="px-3 py-2.5 text-zinc-900 font-semibold">x (new)</th>
-                          <th className="px-3 py-2.5">y1</th>
-                          <th className="px-3 py-2.5">y2</th>
-                          <th className="px-3 py-2.5">y (new)</th>
+                          <th className="px-3 py-2.5">r<sub>1</sub></th>
+                          <th className="px-3 py-2.5">r<sub>2</sub></th>
+                          <th className="px-3 py-2.5 text-blue-700">r</th>
+                          <th className="px-3 py-2.5">x<sub>1</sub></th>
+                          <th className="px-3 py-2.5">x<sub>2</sub></th>
+                          <th className="px-3 py-2.5 text-zinc-900 font-semibold">x</th>
+                          <th className="px-3 py-2.5">y<sub>1</sub></th>
+                          <th className="px-3 py-2.5">y<sub>2</sub></th>
+                          <th className="px-3 py-2.5">y</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-100 text-zinc-700">
@@ -374,8 +374,8 @@ export default function InspectorPage() {
                 Miller-Rabin Probabilistic Primality Test
               </h2>
               <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                Menguji apakah bilangan bulat $n$ prima atau komposit dengan menguraikan $n-1 = 2^s \cdot d$ ($d$ ganjil)
-                dan mengevaluasi $k$ saksi acak (witness) $a \in [2, n-2]$.
+                Menguji apakah bilangan bulat n prima atau komposit dengan menguraikan n &minus; 1 = 2<sup>s</sup> &times; d (d ganjil)
+                dan mengevaluasi k saksi acak (witness) a &isin; [2, n &minus; 2].
               </p>
             </div>
 
@@ -433,7 +433,7 @@ export default function InspectorPage() {
                 </div>
 
                 <span className="text-xs text-zinc-400 font-mono">
-                  Batas Error Probabilitas &le; 4^(-{mrK}) &asymp; {(Math.pow(4, -Number(mrK)) * 100).toFixed(4)}%
+                  Batas Error Probabilitas &le; 4<sup>-{mrK}</sup> &asymp; {(Math.pow(4, -Number(mrK)) * 100).toFixed(4)}%
                 </span>
               </div>
 
@@ -448,7 +448,7 @@ export default function InspectorPage() {
                       <tr>
                         <th className="px-3 py-2.5">Round</th>
                         <th className="px-3 py-2.5">Witness (a)</th>
-                        <th className="px-3 py-2.5">a^d mod n</th>
+                        <th className="px-3 py-2.5">a<sup>d</sup> mod n</th>
                         <th className="px-3 py-2.5">Status Ronde</th>
                       </tr>
                     </thead>
@@ -487,7 +487,7 @@ export default function InspectorPage() {
                 Square-and-Multiply (Modular Exponentiation) Trace
               </h2>
               <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                Menghitung base^exp mod m dalam kompleksitas O(log exp) melalui representasi biner eksponen
+                Menghitung base<sup>exp</sup> mod m dalam kompleksitas O(log exp) melalui representasi biner eksponen
                 (metode right-to-left binary exponentiation).
               </p>
             </div>
@@ -618,8 +618,8 @@ export default function InspectorPage() {
                 Adaptive Byte Chunking Visualizer
               </h2>
               <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                Visualisasi partisi teks UTF-8 ke dalam blok integer m_i sedemikian rupa sehingga setiap blok m_i &lt; n.
-                Ukuran blok adaptif dihitung dengan rumus: B = max(1, floor((bit_length(n) - 1) / 8)).
+                Visualisasi partisi teks UTF-8 ke dalam blok integer m<sub>i</sub> sedemikian rupa sehingga setiap blok m<sub>i</sub> &lt; n.
+                Ukuran blok adaptif dihitung dengan rumus: B = max(1, &lfloor;(bit_length(n) &minus; 1) / 8&rfloor;).
               </p>
             </div>
 
@@ -670,8 +670,8 @@ export default function InspectorPage() {
                     <th className="px-3 py-2.5">Blok i</th>
                     <th className="px-3 py-2.5">Karakter</th>
                     <th className="px-3 py-2.5">Byte Hex</th>
-                    <th className="px-3 py-2.5">Integer m_i</th>
-                    <th className="px-3 py-2.5">Invarian m_i &lt; n</th>
+                    <th className="px-3 py-2.5">Integer m<sub>i</sub></th>
+                    <th className="px-3 py-2.5">Invarian m<sub>i</sub> &lt; n</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 text-zinc-700">
@@ -684,11 +684,11 @@ export default function InspectorPage() {
                       <td className="px-3 py-2">
                         {chk.valid ? (
                           <span className="text-emerald-700 font-medium bg-emerald-50 px-2 py-0.5 rounded text-[11px]">
-                            Valid (m_i &lt; n)
+                            Valid (m<sub>i</sub> &lt; n)
                           </span>
                         ) : (
                           <span className="text-rose-700 font-medium bg-rose-50 px-2 py-0.5 rounded text-[11px]">
-                            Overflow (m_i &ge; n)
+                            Overflow (m<sub>i</sub> &ge; n)
                           </span>
                         )}
                       </td>

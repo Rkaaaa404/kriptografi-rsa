@@ -36,7 +36,7 @@ const ENTITIES: Record<EntityKey, EntityMeta> = {
     id: 'A',
     name: 'PPIC (Entitas A)',
     role: 'Penerbit Dokumen & Signature Pengirim',
-    description: 'Membuat surat jalan dan menandatangani manifest dengan RSA Private Key (d_A).',
+    description: 'Membuat surat jalan dan menandatangani manifest dengan Kunci Privat PPIC (d).',
     storageKey: 'securepass_key_A',
     badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
   },
@@ -44,7 +44,7 @@ const ENTITIES: Record<EntityKey, EntityMeta> = {
     id: 'B',
     name: 'Pos Gerbang (Entitas B)',
     role: 'Pemeriksa Pos & Counter-Signature',
-    description: 'Memverifikasi signature PPIC di pos gerbang dan menambahkan approval clearance (d_B).',
+    description: 'Memverifikasi signature PPIC di pos gerbang dan menambahkan approval clearance (d).',
     storageKey: 'securepass_key_B',
     badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   },
@@ -52,7 +52,7 @@ const ENTITIES: Record<EntityKey, EntityMeta> = {
     id: 'C',
     name: 'Gudang Penerima (Entitas C)',
     role: 'Dekripsi Rahasia & Verifikasi Akhir',
-    description: 'Menerima paket, memvalidasi dual-signature berantai, dan mendekripsi memo rahasia (d_C).',
+    description: 'Menerima paket, memvalidasi dual-signature berantai, dan mendekripsi memo rahasia (d).',
     storageKey: 'securepass_key_C',
     badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
   },
@@ -378,7 +378,7 @@ export default function KeygenPage() {
             </div>
 
             <p className="text-[11px] text-zinc-400">
-              Contoh dosen: $p=47, q=71 \implies n=3337, \phi(n)=3220$. Dipilih $e=79 \implies d=1019$.
+              Contoh dosen: p = 47, q = 71 &rarr; n = 3337, &phi;(n) = 3220. Dipilih e = 79 &rarr; d = 1019.
             </p>
 
             <button

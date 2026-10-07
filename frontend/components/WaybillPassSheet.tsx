@@ -166,7 +166,7 @@ export function WaybillPassSheet({
         ) : (
           <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-100 text-xs font-mono text-zinc-500 flex items-center justify-between">
             <span className="truncate max-w-md">Ciphertext Blocks: [{encrypted_secret.slice(0, 6).join(', ')}...]</span>
-            <span className="text-[11px] text-zinc-400 italic">Terkunci hingga di Gudang C</span>
+            <span className="text-[11px] text-zinc-400 italic">Terkunci hingga di Gudang C (dekripsi d<sub>C</sub>)</span>
           </div>
         )}
       </div>
@@ -181,7 +181,7 @@ export function WaybillPassSheet({
               <span>PPIC Primary Signature</span>
             </div>
             <div className="font-mono text-[11px] text-zinc-500">
-              S_A = <span className="text-zinc-900 font-semibold">{primary_signature}</span>
+              S<sub>A</sub> = <span className="text-zinc-900 font-semibold">{primary_signature}</span>
             </div>
           </div>
 
@@ -208,7 +208,7 @@ export function WaybillPassSheet({
             <div className="font-mono text-[11px] text-zinc-500">
               {clearance?.counter_signature ? (
                 <>
-                  S_B = <span className="text-zinc-900 font-semibold">{clearance.counter_signature}</span>
+                  S<sub>B</sub> = <span className="text-zinc-900 font-semibold">{clearance.counter_signature}</span>
                 </>
               ) : (
                 'Menunggu pemeriksaan gerbang...'
