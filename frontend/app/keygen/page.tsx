@@ -16,8 +16,7 @@ import {
   RefreshCw,
   Cpu,
   Layers,
-  Info,
-  Sliders,
+  Sparkles,
   Calculator,
 } from 'lucide-react'
 
@@ -29,33 +28,33 @@ interface EntityMeta {
   role: string
   description: string
   storageKey: string
-  color: string
+  badgeColor: string
 }
 
 const ENTITIES: Record<EntityKey, EntityMeta> = {
   A: {
     id: 'A',
-    name: 'PPIC (Entity A)',
+    name: 'PPIC (Entitas A)',
     role: 'Penerbit Dokumen & Signature Pengirim',
-    description: 'Bertanggung jawab membuat surat jalan dan menandatangani manifest dengan RSA Private Key.',
+    description: 'Membuat surat jalan dan menandatangani manifest dengan RSA Private Key (d_A).',
     storageKey: 'securepass_key_A',
-    color: 'border-cyan-500/30 text-cyan-400',
+    badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
   },
   B: {
     id: 'B',
-    name: 'Gate Scanner (Entity B)',
+    name: 'Pos Gerbang (Entitas B)',
     role: 'Pemeriksa Pos & Counter-Signature',
-    description: 'Memverifikasi signature PPIC di pos gerbang dan menambahkan approval clearance.',
+    description: 'Memverifikasi signature PPIC di pos gerbang dan menambahkan approval clearance (d_B).',
     storageKey: 'securepass_key_B',
-    color: 'border-emerald-500/30 text-emerald-400',
+    badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   },
   C: {
     id: 'C',
-    name: 'Gudang Penerima (Entity C)',
+    name: 'Gudang Penerima (Entitas C)',
     role: 'Dekripsi Rahasia & Verifikasi Akhir',
-    description: 'Menerima paket, memvalidasi seluruh signature berantai, dan mendekripsi encrypted_secret.',
+    description: 'Menerima paket, memvalidasi dual-signature berantai, dan mendekripsi memo rahasia (d_C).',
     storageKey: 'securepass_key_C',
-    color: 'border-amber-500/30 text-amber-400',
+    badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
   },
 }
 
@@ -83,10 +82,8 @@ export default function KeygenPage() {
     C: null,
   })
 
-  // Copied state indicator
   const [copiedField, setCopiedField] = useState<string | null>(null)
 
-  // Load stored keys on mount
   const refreshStoredKeys = useCallback(() => {
     if (typeof window === 'undefined') return
     const keys: Record<EntityKey, Keypair | null> = { A: null, B: null, C: null }
@@ -107,7 +104,6 @@ export default function KeygenPage() {
     refreshStoredKeys()
   }, [refreshStoredKeys])
 
-  // If tab changes, optionally load the saved key for that entity into view if no active key
   useEffect(() => {
     const saved = savedKeys[selectedEntity]
     if (saved) {
@@ -142,7 +138,6 @@ export default function KeygenPage() {
       }
 
       const res = await api.generateKeypair(payload)
-      // Normalize response
       const nVal = res.n ?? (res.pub_key ? res.pub_key[1] : res.p * res.q)
       const eVal = res.e ?? (res.pub_key ? res.pub_key[0] : 65537)
       const dVal = res.d ?? (res.priv_key ? res.priv_key[0] : 0)
@@ -213,7 +208,6 @@ export default function KeygenPage() {
     }
   }
 
-  // Save keypair to localStorage
   const handleSaveToLocalStorage = () => {
     if (!currentKeypair || !currentKeypair.valid) {
       toast.error('Tidak ada kunci valid untuk disimpan!')
@@ -223,48 +217,39 @@ export default function KeygenPage() {
     const keyName = `securepass_key_${selectedEntity}`
     localStorage.setItem(keyName, JSON.stringify(currentKeypair))
     refreshStoredKeys()
-    toast.success(`Kunci ${ENTITIES[selectedEntity].name} tersimpan ke LocalStorage (${keyName})`)
+    window.dispatchEvent(new Event('securepass_keyring_updated'))
+    toast.success(`Kunci ${ENTITIES[selectedEntity].name} tersimpan ke LocalStorage`)
   }
 
-  // Delete keypair from localStorage
   const handleDeleteFromLocalStorage = () => {
     const keyName = `securepass_key_${selectedEntity}`
     localStorage.removeItem(keyName)
     refreshStoredKeys()
+    window.dispatchEvent(new Event('securepass_keyring_updated'))
     toast.info(`Kunci ${ENTITIES[selectedEntity].name} dihapus dari LocalStorage`)
   }
 
   const isCurrentKeySaved = Boolean(savedKeys[selectedEntity])
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-      {/* Page Title & Intro */}
-      <div className="border-b border-slate-800 pb-5">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2.5 bg-cyan-950/60 border border-cyan-700/50 rounded-lg text-cyan-400">
-            <KeyRound className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
-              RSA Key Management & Parameter Generator
-            </h1>
-            <p className="text-sm text-slate-400">
-              Generasi dan validasi pasangan kunci asimetris $(e, n)$ dan $(d, n)$ untuk tiap entitas rantai pasok.
-            </p>
-          </div>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8 text-left">
+      {/* Page Title */}
+      <div className="border-b border-zinc-200/80 pb-5">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 text-xs font-semibold uppercase tracking-wider mb-2">
+          <KeyRound className="w-3.5 h-3.5" /> Keyring Engine
         </div>
+        <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">
+          Pengelolaan Kunci RSA &amp; Generator Parameter
+        </h1>
+        <p className="text-sm text-zinc-600 mt-1 max-w-2xl">
+          Generasi dan validasi pasangan kunci asimetris $(e, n)$ dan $(d, n)$ untuk tiap entitas rantai pasok logistik.
+        </p>
       </div>
 
       {/* Entity Selection Tabs */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Layers className="w-4 h-4 text-cyan-400" />
-            Pilih Entitas Sistem
-          </label>
-          <span className="text-xs text-slate-500">
-            Kunci disimpan per entitas di browser LocalStorage
-          </span>
+        <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+          Pilih Entitas Rantai Pasok
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -276,474 +261,233 @@ export default function KeygenPage() {
             return (
               <button
                 key={id}
-                type="button"
                 onClick={() => setSelectedEntity(id)}
-                className={`text-left p-4 rounded-xl border transition-all relative overflow-hidden ${
+                className={`p-4 rounded-2xl border text-left transition-all ${
                   isSelected
-                    ? 'bg-slate-900 border-cyan-500/80 shadow-lg shadow-cyan-950/30 ring-1 ring-cyan-500/50'
-                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                    ? 'border-zinc-900 bg-zinc-900 text-white shadow-subtle'
+                    : 'border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 shadow-subtle'
                 }`}
               >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div>
-                    <span className="text-xs font-mono text-cyan-400 uppercase tracking-wider">
-                      Entitas {id}
-                    </span>
-                    <h3 className="font-semibold text-slate-100 text-base">{entity.name}</h3>
-                  </div>
-
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full border ${
+                      isSelected ? 'bg-zinc-800 text-white border-zinc-700' : entity.badgeColor
+                    }`}
+                  >
+                    Entitas {id}
+                  </span>
                   {isSaved ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-700/60 text-emerald-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Tersimpan
+                    <span className="text-[11px] font-medium flex items-center gap-1 text-emerald-600">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Tersimpan
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400">
-                      Kosong
-                    </span>
+                    <span className="text-[11px] text-zinc-400">Kosong</span>
                   )}
                 </div>
-
-                <p className="text-xs text-slate-400 line-clamp-2">{entity.description}</p>
+                <div className="font-semibold text-sm mt-2">{entity.name}</div>
+                <div className={`text-xs mt-0.5 line-clamp-2 ${isSelected ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                  {entity.role}
+                </div>
               </button>
             )
           })}
         </div>
       </div>
 
-      {/* Main Grid: Controls vs Result */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Generator & Manual Validator Forms */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Card 1: Automatic Keypair Generation */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
-              <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-cyan-400" />
-                <h2 className="text-sm font-semibold text-slate-100 uppercase tracking-wider">
-                  Metode 1: Generasi Otomatis
-                </h2>
-              </div>
-              <span className="text-xs text-cyan-400 font-mono bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/40">
-                Miller-Rabin Core
-              </span>
-            </div>
-
-            <form onSubmit={handleGenerate} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Panjang Bit Bilangan Prima ($p, q$)
-                </label>
-                <select
-                  value={bitSize}
-                  onChange={(e) => setBitSize(Number(e.target.value))}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
-                >
-                  <option value={16}>16-bit (Cepat / Demo Edukasi ~ 65,536)</option>
-                  <option value={32}>32-bit (Standar Tugas / Default ~ 4.29 Miliar)</option>
-                  <option value={64}>64-bit (Keamanan Menengah)</option>
-                  <option value={128}>128-bit (Kuat / BigInt)</option>
-                </select>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Menghasilkan modulus $n = p \times q$ dengan ukuran mendekati {bitSize * 2} bit.
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center justify-between">
-                  <span>Eksponen Publik $e$ (Opsional)</span>
-                  <span className="text-[11px] text-slate-500">Kosongkan untuk auto (65537)</span>
-                </label>
-                <input
-                  type="number"
-                  placeholder="Contoh: 65537, 79, 3, 17"
-                  value={eManualGen}
-                  onChange={(e) => setEManualGen(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 placeholder:text-slate-600 transition-colors"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isGenerating}
-                className="w-full flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 disabled:bg-cyan-900/60 disabled:cursor-not-allowed text-slate-950 font-semibold px-4 py-2.5 rounded-lg text-sm transition-all shadow-md shadow-cyan-950/50"
-              >
-                {isGenerating ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
-                    Membuat Kunci...
-                  </>
-                ) : (
-                  <>
-                    <KeyRound className="w-4 h-4 text-slate-950" />
-                    Generate Keypair Entitas {selectedEntity}
-                  </>
-                )}
-              </button>
-            </form>
+      {/* Two Column Configuration: Auto Generate & Manual Validate */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Column 1: Automatic Generation Form */}
+        <div className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-card space-y-4">
+          <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
+            <Cpu className="w-4 h-4 text-zinc-700" />
+            <h3 className="font-bold text-sm text-zinc-900">1. Generator Otomatis (Miller-Rabin Primes)</h3>
           </div>
 
-          {/* Card 2: Manual Parameter Validation */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
-              <div className="flex items-center gap-2">
-                <Calculator className="w-4 h-4 text-amber-400" />
-                <h2 className="text-sm font-semibold text-slate-100 uppercase tracking-wider">
-                  Metode 2: Validasi Manual ($p, q, e$)
-                </h2>
-              </div>
-              <span className="text-xs text-amber-400 font-mono bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/40">
-                Pre-filled Test Case
-              </span>
+          <form onSubmit={handleGenerate} className="space-y-4 text-xs">
+            <div>
+              <label className="block text-zinc-600 font-medium mb-1">Panjang Bit Modulus (bits):</label>
+              <select
+                value={bitSize}
+                onChange={(e) => setBitSize(Number(e.target.value))}
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+              >
+                <option value={16}>16 bits (Demo Cepat)</option>
+                <option value={32}>32 bits (Standar Tugas)</option>
+                <option value={64}>64 bits (Standard Security)</option>
+              </select>
             </div>
 
-            <p className="text-xs text-slate-400">
-              Uji parameter matematis sesuai contoh modul kriptografi (contoh: $p=47$, $q=71$, $e=79$). Sistem akan menghitung $\phi(n)$ dan mencari invers modulo $d \equiv e^{'{'}-1{'}'} \pmod{\phi(n)}$.
-            </p>
+            <div>
+              <label className="block text-zinc-600 font-medium mb-1">Nilai Eksponen Publik e (Opsional):</label>
+              <input
+                type="text"
+                placeholder="Default: 65537"
+                value={eManualGen}
+                onChange={(e) => setEManualGen(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+              />
+            </div>
 
-            <form onSubmit={handleValidate} className="space-y-3.5">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1 font-mono">
-                    Prima $p$
-                  </label>
-                  <input
-                    type="number"
-                    value={manualP}
-                    onChange={(e) => setManualP(e.target.value)}
-                    required
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1 font-mono">
-                    Prima $q$
-                  </label>
-                  <input
-                    type="number"
-                    value={manualQ}
-                    onChange={(e) => setManualQ(e.target.value)}
-                    required
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
-                  />
-                </div>
-              </div>
+            <button
+              type="submit"
+              disabled={isGenerating}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-xs transition-colors shadow-subtle disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
+              <span>{isGenerating ? 'Mencari Prima...' : 'Generate Kunci Acak via Backend'}</span>
+            </button>
+          </form>
+        </div>
 
+        {/* Column 2: Manual Validation Form (Kuliah p=47, q=71, e=79) */}
+        <div className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-card space-y-4">
+          <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
+            <Calculator className="w-4 h-4 text-zinc-700" />
+            <h3 className="font-bold text-sm text-zinc-900">2. Input Manual Parameter Kuliah (Bab 3)</h3>
+          </div>
+
+          <form onSubmit={handleValidate} className="space-y-4 text-xs">
+            <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1 font-mono">
-                  Eksponen Publik $e$
-                </label>
+                <label className="block text-zinc-600 font-medium mb-1">Prima p:</label>
+                <input
+                  type="number"
+                  value={manualP}
+                  onChange={(e) => setManualP(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                />
+              </div>
+              <div>
+                <label className="block text-zinc-600 font-medium mb-1">Prima q:</label>
+                <input
+                  type="number"
+                  value={manualQ}
+                  onChange={(e) => setManualQ(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                />
+              </div>
+              <div>
+                <label className="block text-zinc-600 font-medium mb-1">Eksponen e:</label>
                 <input
                   type="number"
                   value={manualE}
                   onChange={(e) => setManualE(e.target.value)}
-                  required
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
                 />
-                <span className="text-[11px] text-slate-500 mt-1 block">
-                  Syarat: $\gcd(e, (p-1)(q-1)) = 1$ dan $1 &lt; e &lt; \phi(n)$
-                </span>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isValidating}
-                className="w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-500 active:bg-amber-700 disabled:bg-amber-900/60 disabled:cursor-not-allowed text-slate-950 font-semibold px-4 py-2.5 rounded-lg text-sm transition-all shadow-md shadow-amber-950/50"
-              >
-                {isValidating ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
-                    Memvalidasi Parameter...
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="w-4 h-4 text-slate-950" />
-                    Validasi Manual ($p, q, e$)
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* Right Column: Key Result Card & Actions */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-6">
-            {/* Header & Status Badge */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <Cpu className="w-5 h-5 text-cyan-400" />
-                <div>
-                  <h2 className="text-base font-semibold text-slate-100">
-                    Hasil Pasangan Kunci RSA
-                  </h2>
-                  <p className="text-xs text-slate-400 font-mono">
-                    Entitas: {ENTITIES[selectedEntity].name}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {currentKeypair ? (
-                  currentKeypair.valid ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold text-emerald-400 bg-emerald-950/50 border border-emerald-700">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                      KUNCI VALID
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold text-rose-400 bg-rose-950/50 border border-rose-700">
-                      <XCircle className="w-3.5 h-3.5 text-rose-400" />
-                      INVALID PARAMETER
-                    </span>
-                  )
-                ) : (
-                  <span className="text-xs text-slate-500 italic">Belum Ada Kunci Dimuat</span>
-                )}
               </div>
             </div>
 
-            {/* Error Message banner if invalid */}
-            {currentKeypair && !currentKeypair.valid && (
-              <div className="p-3.5 rounded-lg bg-rose-950/40 border border-rose-800/80 text-rose-300 text-xs flex items-start gap-2.5">
-                <XCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold block mb-0.5">Validasi Matematika Gagal:</span>
-                  <span>{currentKeypair.message || 'Parameter tidak memenuhi syarat RSA prima / koprima.'}</span>
-                </div>
-              </div>
-            )}
+            <p className="text-[11px] text-zinc-400">
+              Contoh dosen: $p=47, q=71 \implies n=3337, \phi(n)=3220$. Dipilih $e=79 \implies d=1019$.
+            </p>
 
-            {/* If no key at all */}
-            {!currentKeypair && (
-              <div className="py-12 px-4 text-center border border-dashed border-slate-800 rounded-lg">
-                <KeyRound className="w-10 h-10 text-slate-700 mx-auto mb-3" />
-                <h4 className="text-sm font-medium text-slate-300 mb-1">
-                  Belum Ada Kunci yang Digenerate
-                </h4>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  Gunakan tombol &quot;Generate Keypair&quot; di sisi kiri atau lakukan &quot;Validasi Manual&quot; dengan memasukkan nilai $p, q, e$.
-                </p>
-              </div>
-            )}
-
-            {/* If key exists */}
-            {currentKeypair && (
-              <div className="space-y-5">
-                {/* Mathematical Parameter Summary */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-500 font-mono block">Prima $p$</span>
-                    <span className="text-xs font-mono font-medium text-slate-200 truncate block">
-                      {currentKeypair.p ?? 'N/A'}
-                    </span>
-                  </div>
-                  <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-500 font-mono block">Prima $q$</span>
-                    <span className="text-xs font-mono font-medium text-slate-200 truncate block">
-                      {currentKeypair.q ?? 'N/A'}
-                    </span>
-                  </div>
-                  <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-500 font-mono block">Modulus $n$ ($p \times q$)</span>
-                    <span className="text-xs font-mono font-medium text-cyan-300 truncate block">
-                      {currentKeypair.n ?? (currentKeypair.pub_key ? currentKeypair.pub_key[1] : 'N/A')}
-                    </span>
-                  </div>
-                  <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-500 font-mono block">Totient $\phi(n)$</span>
-                    <span className="text-xs font-mono font-medium text-slate-200 truncate block">
-                      {currentKeypair.phi ?? 'N/A'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Public Key Display (Cyan Themed) */}
-                <div className="p-4 rounded-xl bg-cyan-950/30 border border-cyan-800/60 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-                        Public Key $(e, n)$
-                      </h3>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        copyToClipboard(
-                          JSON.stringify(currentKeypair.pub_key),
-                          'Public Key'
-                        )
-                      }
-                      className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors"
-                    >
-                      {copiedField === 'Public Key' ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-emerald-400">Tersalin</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>Salin</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  <div className="space-y-1.5 font-mono text-xs">
-                    <div className="flex items-baseline justify-between text-slate-300 bg-slate-950/70 p-2 rounded border border-slate-800/80">
-                      <span className="text-slate-500">Eksponen Publik ($e$):</span>
-                      <span className="text-cyan-300 font-bold">
-                        {currentKeypair.e ?? (currentKeypair.pub_key ? currentKeypair.pub_key[0] : 'N/A')}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline justify-between text-slate-300 bg-slate-950/70 p-2 rounded border border-slate-800/80">
-                      <span className="text-slate-500">Modulus ($n$):</span>
-                      <span className="text-cyan-300 font-bold break-all max-w-[70%] text-right">
-                        {currentKeypair.n ?? (currentKeypair.pub_key ? currentKeypair.pub_key[1] : 'N/A')}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-cyan-400/80">
-                    Kunci ini dapat dibagikan secara publik untuk verifikasi tanda tangan digital atau enkripsi pesan rahasia.
-                  </p>
-                </div>
-
-                {/* Private Key Display (Amber Themed) */}
-                <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-800/60 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-amber-400" />
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400">
-                        Private Key $(d, n)$
-                      </h3>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        copyToClipboard(
-                          JSON.stringify(currentKeypair.priv_key),
-                          'Private Key'
-                        )
-                      }
-                      className="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
-                    >
-                      {copiedField === 'Private Key' ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-emerald-400">Tersalin</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>Salin</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  <div className="space-y-1.5 font-mono text-xs">
-                    <div className="flex items-baseline justify-between text-slate-300 bg-slate-950/70 p-2 rounded border border-slate-800/80">
-                      <span className="text-slate-500">Eksponen Privat ($d$):</span>
-                      <span className="text-amber-300 font-bold break-all max-w-[70%] text-right">
-                        {currentKeypair.d ?? (currentKeypair.priv_key ? currentKeypair.priv_key[0] : 'N/A')}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline justify-between text-slate-300 bg-slate-950/70 p-2 rounded border border-slate-800/80">
-                      <span className="text-slate-500">Modulus ($n$):</span>
-                      <span className="text-amber-300 font-bold break-all max-w-[70%] text-right">
-                        {currentKeypair.n ?? (currentKeypair.priv_key ? currentKeypair.priv_key[1] : 'N/A')}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-amber-400/80 flex items-center gap-1">
-                    <Info className="w-3 h-3 shrink-0" />
-                    Rahasia matematis: Memenuhi $(e \times d) \pmod{\phi(n)} = 1$. Digunakan untuk signing dan dekripsi.
-                  </p>
-                </div>
-
-                {/* Storage Action Buttons */}
-                <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-slate-800">
-                  <div className="flex items-center gap-2">
-                    {isCurrentKeySaved ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-400 bg-emerald-950/50 border border-emerald-700">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                        Tersimpan di LocalStorage (`securepass_key_{selectedEntity}`)
-                      </span>
-                    ) : (
-                      <span className="text-xs text-slate-400">
-                        Kunci ini belum disimpan untuk Entitas {selectedEntity}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {isCurrentKeySaved && (
-                      <button
-                        type="button"
-                        onClick={handleDeleteFromLocalStorage}
-                        className="px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:text-rose-300 bg-rose-950/30 hover:bg-rose-950/50 border border-rose-800/60 transition-colors flex items-center gap-1.5"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        Hapus
-                      </button>
-                    )}
-
-                    <button
-                      type="button"
-                      disabled={!currentKeypair.valid}
-                      onClick={handleSaveToLocalStorage}
-                      className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-950 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed transition-all shadow-md shadow-emerald-950/40 flex items-center gap-2"
-                    >
-                      <Save className="w-3.5 h-3.5 text-slate-950" />
-                      Simpan Kunci ke LocalStorage
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Quick Storage Overview Table */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-cyan-400" />
-              Status Konfigurasi Kunci Seluruh Entitas
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-              {(['A', 'B', 'C'] as EntityKey[]).map((id) => {
-                const k = savedKeys[id]
-                return (
-                  <div
-                    key={id}
-                    className="p-3 rounded-lg bg-slate-950 border border-slate-800/80 flex flex-col justify-between"
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-semibold text-xs text-slate-200">
-                        Entitas {id}
-                      </span>
-                      {k ? (
-                        <span className="w-2 h-2 rounded-full bg-emerald-400" title="Kunci Siap" />
-                      ) : (
-                        <span className="w-2 h-2 rounded-full bg-slate-600" title="Belum Dikonfigurasi" />
-                      )}
-                    </div>
-                    {k ? (
-                      <div className="text-[11px] font-mono text-slate-400 space-y-0.5">
-                        <div className="truncate">e: {k.e ?? (k.pub_key ? k.pub_key[0] : '-')}</div>
-                        <div className="truncate">n: {k.n ?? (k.pub_key ? k.pub_key[1] : '-')}</div>
-                      </div>
-                    ) : (
-                      <span className="text-[11px] text-slate-600 italic">Belum disimpan</span>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+            <button
+              type="submit"
+              disabled={isValidating}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-800 font-medium text-xs transition-colors shadow-subtle disabled:opacity-50"
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${isValidating ? 'animate-spin' : ''}`} />
+              <span>{isValidating ? 'Memvalidasi...' : 'Hitung Parameter & Validasi EEA'}</span>
+            </button>
+          </form>
         </div>
       </div>
+
+      {/* Active Keypair Result Display Card */}
+      {currentKeypair && (
+        <div className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-card space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-100">
+            <div>
+              <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                Hasil Pasangan Kunci ({ENTITIES[selectedEntity].name})
+              </div>
+              <div className="text-base font-bold text-zinc-900 mt-0.5">
+                Public Key: [e={currentKeypair.e}, n={currentKeypair.n}]
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSaveToLocalStorage}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-900 text-white font-medium text-xs hover:bg-zinc-800 shadow-subtle"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>Simpan Kunci</span>
+              </button>
+
+              {isCurrentKeySaved && (
+                <button
+                  onClick={handleDeleteFromLocalStorage}
+                  className="p-2 rounded-xl border border-zinc-200 text-zinc-500 hover:text-rose-600 hover:bg-zinc-50"
+                  title="Hapus kunci tersimpan"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Key Parameters Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
+              <span className="text-zinc-400 text-[11px]">Prima p:</span>
+              <div className="font-bold text-zinc-900 mt-0.5">{currentKeypair.p}</div>
+            </div>
+            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
+              <span className="text-zinc-400 text-[11px]">Prima q:</span>
+              <div className="font-bold text-zinc-900 mt-0.5">{currentKeypair.q}</div>
+            </div>
+            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
+              <span className="text-zinc-400 text-[11px]">Modulus n (p × q):</span>
+              <div className="font-bold text-zinc-900 mt-0.5">{currentKeypair.n}</div>
+            </div>
+            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
+              <span className="text-zinc-400 text-[11px]">Totient φ(n):</span>
+              <div className="font-bold text-zinc-900 mt-0.5">{currentKeypair.phi}</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+            <div className="p-3.5 bg-blue-50/50 rounded-xl border border-blue-200/80 flex items-center justify-between">
+              <div>
+                <span className="text-blue-700 text-[11px] font-sans font-semibold block">
+                  Public Key (e, n):
+                </span>
+                <span className="font-bold text-blue-950 mt-0.5 block">
+                  [{currentKeypair.e}, {currentKeypair.n}]
+                </span>
+              </div>
+              <button
+                onClick={() =>
+                  copyToClipboard(`[${currentKeypair.e}, ${currentKeypair.n}]`, 'Public Key')
+                }
+                className="p-1.5 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-100"
+              >
+                {copiedField === 'Public Key' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            <div className="p-3.5 bg-amber-50/50 rounded-xl border border-amber-200/80 flex items-center justify-between">
+              <div>
+                <span className="text-amber-800 text-[11px] font-sans font-semibold block">
+                  Private Key (d, n) - RAHASIA:
+                </span>
+                <span className="font-bold text-amber-950 mt-0.5 block">
+                  [{currentKeypair.d}, {currentKeypair.n}]
+                </span>
+              </div>
+              <button
+                onClick={() =>
+                  copyToClipboard(`[${currentKeypair.d}, ${currentKeypair.n}]`, 'Private Key')
+                }
+                className="p-1.5 rounded-lg border border-amber-200 text-amber-800 hover:bg-amber-100"
+              >
+                {copiedField === 'Private Key' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

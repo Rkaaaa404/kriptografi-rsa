@@ -1,8 +1,4 @@
-"use client";
-
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "sonner";
-import { useState } from "react";
+import { Providers } from "./providers";
 import { Navbar } from "@/components/Navbar";
 import "./globals.css";
 
@@ -16,31 +12,13 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: { staleTime: 60 * 1000 },
-        },
-      })
-  );
-
   return (
-    <html lang="en" className="dark">
-      <body className="bg-slate-950 text-slate-100 min-h-screen antialiased">
-        <QueryClientProvider client={queryClient}>
+    <html lang="id">
+      <body className="bg-slate-50/70 text-zinc-900 min-h-screen antialiased selection:bg-zinc-900 selection:text-white">
+        <Providers>
           <Navbar />
           {children}
-          <Toaster
-            theme="dark"
-            position="top-right"
-            toastOptions={{
-              classNames: {
-                toast: "bg-slate-900 border border-slate-800 text-slate-100",
-              },
-            }}
-          />
-        </QueryClientProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -26,14 +26,20 @@ export interface ManifestHeader {
   vehicle_plate: string;
   driver_name: string;
   item_list: ItemLine[];
+  items?: ItemLine[];
 }
 
 export interface GateClearance {
-  officer_id: string;
-  cleared_at: string;
-  gate_signature: number;
+  gate_id: string;
+  inspector_id?: string;
+  officer_id?: string;
+  timestamp_inspected?: string;
+  cleared_at?: string;
+  status?: string;
+  counter_signature?: number;
+  clearance_digest?: number;
+  gate_signature?: number;
 }
-
 export interface GatePassPackage {
   security: SecurityLayer;
   header: ManifestHeader;
@@ -54,6 +60,8 @@ export interface Keypair {
   d?: number;
   valid?: boolean;
   message?: string;
+  bit_length?: number;
+  entity?: string;
 }
 
 export interface InspectStep {
