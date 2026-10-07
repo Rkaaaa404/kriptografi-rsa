@@ -273,6 +273,7 @@ function AttackLabContent() {
                     type="number"
                     value={newQty}
                     onChange={(e) => setNewQty(Number(e.target.value))}
+                    placeholder="Contoh: 9999"
                     className="w-full px-3 py-1.5 rounded-lg border border-zinc-200 bg-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900"
                   />
                 </div>
@@ -283,6 +284,7 @@ function AttackLabContent() {
                     type="text"
                     value={newPlate}
                     onChange={(e) => setNewPlate(e.target.value)}
+                    placeholder="Contoh: B 6666 HCK"
                     className="w-full px-3 py-1.5 rounded-lg border border-zinc-200 bg-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900"
                   />
                 </div>
@@ -305,6 +307,7 @@ function AttackLabContent() {
                     type="number"
                     value={rogueD}
                     onChange={(e) => setRogueD(Number(e.target.value))}
+                    placeholder="Contoh: 2753"
                     className="w-full px-3 py-1.5 rounded-lg border border-zinc-200 bg-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900"
                   />
                 </div>
@@ -314,6 +317,7 @@ function AttackLabContent() {
                     type="number"
                     value={rogueN}
                     onChange={(e) => setRogueN(Number(e.target.value))}
+                    placeholder="Contoh: 3233"
                     className="w-full px-3 py-1.5 rounded-lg border border-zinc-200 bg-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900"
                   />
                 </div>
@@ -336,6 +340,7 @@ function AttackLabContent() {
                   type="number"
                   value={sigDelta}
                   onChange={(e) => setSigDelta(Number(e.target.value))}
+                  placeholder="Contoh: 1"
                   className="w-full px-3 py-1.5 rounded-lg border border-zinc-200 bg-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900"
                 />
               </div>

@@ -35,31 +35,27 @@ export function UnifiedManifestPipeline() {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1)
   const [keyring, setKeyring] = useState<KeyringState>({ A: null, B: null, C: null })
 
-  // Step 1: Form state
+  // Step 1: Form state (Clean inputs with clues/placeholders)
   const [passId, setPassId] = useState(generatePassId())
   const [timestamp, setTimestamp] = useState(new Date().toISOString())
   const [validUntil, setValidUntil] = useState(new Date(Date.now() + 24 * 3600 * 1000).toISOString())
-  const [issuerEntity, setIssuerEntity] = useState('PPIC Dept (Surabaya Plant-1)')
-  const [origin, setOrigin] = useState('Pabrik Surabaya (Plant-1)')
-  const [destination, setDestination] = useState('Gudang Logistik Jakarta (DC-2)')
-  const [vehiclePlate, setVehiclePlate] = useState('B 9182 UXZ')
-  const [driverName, setDriverName] = useState('Budi Santoso')
-  const [secretNote, setSecretNote] = useState(
-    'KODE SEGEL FISIK: SEC-8842-ALPHA. Cocokkan segel kontainer nomor #00921 sebelum pembongkaran muatan.'
-  )
+  const [issuerEntity, setIssuerEntity] = useState('')
+  const [origin, setOrigin] = useState('')
+  const [destination, setDestination] = useState('')
+  const [vehiclePlate, setVehiclePlate] = useState('')
+  const [driverName, setDriverName] = useState('')
+  const [secretNote, setSecretNote] = useState('')
   const [items, setItems] = useState<ItemLine[]>([
-    { sku: 'SKU-ELC-001', name: 'Microcontroller Unit V2', qty: 250 },
-    { sku: 'SKU-SMR-004', name: 'Industrial Sensor Module', qty: 100 },
+    { sku: '', name: '', qty: 100 },
   ])
   const [isIssuing, setIsIssuing] = useState(false)
 
   // Step 2: Gate state
-  const [officerId, setOfficerId] = useState('OFFICER-B01')
-  const [gateId, setGateId] = useState('GATE-OUT-01')
+  const [officerId, setOfficerId] = useState('')
+  const [gateId, setGateId] = useState('')
   const [isVerifyingGate, setIsVerifyingGate] = useState(false)
   const [isClearingGate, setIsClearingGate] = useState(false)
   const [gateVerifyResult, setGateVerifyResult] = useState<GateVerifyResponse | null>(null)
-
   // Step 3: Warehouse state
   const [isReceiving, setIsReceiving] = useState(false)
   const [receiveResult, setReceiveResult] = useState<ReceiveResponse | null>(null)
@@ -93,10 +89,37 @@ export function UnifiedManifestPipeline() {
     return () => window.removeEventListener('securepass_keyring_updated', syncKeys)
   }, [])
 
+  const handleLoadSampleData = () => {
+    setIssuerEntity('PPIC Dept (Surabaya Plant-1)')
+    setOrigin('Pabrik Surabaya (Plant-1)')
+    setDestination('Gudang Logistik Jakarta (DC-2)')
+    setVehiclePlate('B 9182 UXZ')
+    setDriverName('Budi Santoso')
+    setSecretNote('KODE SEGEL FISIK: SEC-8842-ALPHA. Cocokkan segel kontainer nomor #00921 sebelum pembongkaran muatan.')
+    setItems([
+      { sku: 'SKU-ELC-001', name: 'Microcontroller Unit V2', qty: 250 },
+      { sku: 'SKU-SMR-004', name: 'Industrial Sensor Module', qty: 100 },
+    ])
+    setOfficerId('OFFICER-B01')
+    setGateId('GATE-OUT-01')
+    toast.success('Data contoh demo berhasil dimuat ke formulir!')
+  }
+
+  const handleClearForm = () => {
+    setIssuerEntity('')
+    setOrigin('')
+    setDestination('')
+    setVehiclePlate('')
+    setDriverName('')
+    setSecretNote('')
+    setItems([{ sku: '', name: '', qty: 100 }])
+    toast.info('Formulir dibersihkan.')
+  }
+
   const handleAddItem = () => {
     setItems((prev) => [
       ...prev,
-      { sku: `SKU-${Date.now().toString().slice(-4)}`, name: 'Komponen Tambahan', qty: 50 },
+      { sku: '', name: '', qty: 50 },
     ])
   }
 
@@ -117,21 +140,34 @@ export function UnifiedManifestPipeline() {
       return
     }
 
+    const trimmedSecret = secretNote.trim()
+    if (!trimmedSecret) {
+      toast.error('Catatan rahasia belum diisi! Masukkan instruksi rahasia atau klik "Muat Contoh Demo".')
+      return
+    }
+
+    // Prepare sanitized items
+    const effectiveItems = items.map((it, idx) => ({
+      sku: it.sku.trim() || `SKU-ITEM-${idx + 1}`,
+      name: it.name.trim() || `Barang Muatan #${idx + 1}`,
+      qty: it.qty > 0 ? it.qty : 10,
+    }))
+
     setIsIssuing(true)
     try {
       const res = await api.issuePass({
         manifest: {
-          pass_id: passId,
+          pass_id: passId || generatePassId(),
           timestamp,
           valid_until: validUntil,
-          issuer_entity: issuerEntity,
-          origin,
-          destination,
-          vehicle_plate: vehiclePlate,
-          driver_name: driverName,
-          item_list: items,
+          issuer_entity: issuerEntity.trim() || 'PPIC Department',
+          origin: origin.trim() || 'Pabrik Surabaya (Plant-1)',
+          destination: destination.trim() || 'Gudang Logistik Jakarta (DC-2)',
+          vehicle_plate: vehiclePlate.trim() || 'B 9182 UXZ',
+          driver_name: driverName.trim() || 'Budi Santoso',
+          item_list: effectiveItems,
         },
-        secret_note: secretNote,
+        secret_note: trimmedSecret,
         priv_key_a: keyring.A.priv_key,
         pub_key_c: keyring.C.pub_key,
         key_bits_a: keyring.A.bit_length || 32,
@@ -360,7 +396,7 @@ export function UnifiedManifestPipeline() {
           {/* STEP 1: PPIC Form */}
           {currentStep === 1 && (
             <div className="rounded-2xl border border-zinc-200/90 bg-white p-6 sm:p-8 shadow-card space-y-6 text-left">
-              <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-100">
                 <div>
                   <span className="text-[11px] font-mono uppercase font-semibold text-blue-600 tracking-wider">
                     Tahap 1 &bull; Entitas A
@@ -370,74 +406,106 @@ export function UnifiedManifestPipeline() {
                     Buat manifest pengiriman, tandatangani dengan Kunci Privat A, dan enkripsi catatan rahasia dengan Kunci Publik C.
                   </p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-blue-50 text-blue-700">
-                  <FileText className="w-5 h-5" />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleLoadSampleData}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold transition-colors"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Isi Contoh Demo</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClearForm}
+                    className="px-2.5 py-1.5 rounded-xl border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 text-xs font-medium transition-colors"
+                  >
+                    Reset Form
+                  </button>
                 </div>
               </div>
 
-              {/* Form Grid */}
+              {/* Form Grid with Clues (Helper Text) and Placeholders */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <label className="block text-zinc-600 font-medium mb-1">Nomor Pass ID</label>
+                  <label className="block text-zinc-700 font-semibold mb-0.5">Nomor Pass ID</label>
+                  <span className="block text-[11px] text-zinc-400 mb-1">Identifikasi unik resi (otomatis digenerate)</span>
                   <input
                     type="text"
                     value={passId}
                     onChange={(e) => setPassId(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                    placeholder="Contoh: SP-20261007-9182"
+                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white font-mono text-zinc-900 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                   />
                 </div>
                 <div>
-                  <label className="block text-zinc-600 font-medium mb-1">Penerbit Dokumen</label>
+                  <label className="block text-zinc-700 font-semibold mb-0.5">Departemen Penerbit (Entitas A)</label>
+                  <span className="block text-[11px] text-zinc-400 mb-1">Unit kerja berwenang penandatangan manifest</span>
                   <input
                     type="text"
                     value={issuerEntity}
                     onChange={(e) => setIssuerEntity(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                    placeholder="Contoh: PPIC Dept (Surabaya Plant-1)"
+                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-zinc-900 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                   />
                 </div>
                 <div>
-                  <label className="block text-zinc-600 font-medium mb-1">Lokasi Asal (Origin)</label>
+                  <label className="block text-zinc-700 font-semibold mb-0.5">Lokasi Asal (Origin)</label>
+                  <span className="block text-[11px] text-zinc-400 mb-1">Titik muat atau pabrik tempat kargo diberangkatkan</span>
                   <input
                     type="text"
                     value={origin}
                     onChange={(e) => setOrigin(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                    placeholder="Contoh: Pabrik Surabaya (Plant-1)"
+                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-zinc-900 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                   />
                 </div>
                 <div>
-                  <label className="block text-zinc-600 font-medium mb-1">Tujuan Pengiriman</label>
+                  <label className="block text-zinc-700 font-semibold mb-0.5">Tujuan Pengiriman (Destination)</label>
+                  <span className="block text-[11px] text-zinc-400 mb-1">Gudang tujuan yang berhak mendekripsi muatan</span>
                   <input
                     type="text"
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                    placeholder="Contoh: Gudang Logistik Jakarta (DC-2)"
+                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-zinc-900 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                   />
                 </div>
                 <div>
-                  <label className="block text-zinc-600 font-medium mb-1">Plat Nomor Armada</label>
+                  <label className="block text-zinc-700 font-semibold mb-0.5">Plat Nomor Armada (Nopol)</label>
+                  <span className="block text-[11px] text-zinc-400 mb-1">Nomor polisi truk untuk mencegah pergantian kargo fisik</span>
                   <input
                     type="text"
                     value={vehiclePlate}
                     onChange={(e) => setVehiclePlate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                    placeholder="Contoh: B 9182 UXZ"
+                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white font-mono text-zinc-900 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                   />
                 </div>
                 <div>
-                  <label className="block text-zinc-600 font-medium mb-1">Nama Pengemudi</label>
+                  <label className="block text-zinc-700 font-semibold mb-0.5">Nama Pengemudi (Supir)</label>
+                  <span className="block text-[11px] text-zinc-400 mb-1">Nama lengkap pengemudi pembawa muatan</span>
                   <input
                     type="text"
                     value={driverName}
                     onChange={(e) => setDriverName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                    placeholder="Contoh: Budi Santoso"
+                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-zinc-900 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                   />
                 </div>
               </div>
 
-              {/* Items Section */}
+              {/* Items Section with Clues */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-semibold text-zinc-700">Daftar Barang (Muatan)</label>
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-700">Daftar Barang (Muatan Fisik)</label>
+                    <span className="block text-[11px] text-zinc-400">
+                      SKU, nama barang, dan kuantitas dihitung bersama ke dalam nilai hash digital H(M)
+                    </span>
+                  </div>
                   <button
+                    type="button"
                     onClick={handleAddItem}
                     className="flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-700"
                   >
@@ -449,38 +517,39 @@ export function UnifiedManifestPipeline() {
                     <div key={idx} className="flex items-center gap-2">
                       <input
                         type="text"
-                        placeholder="SKU"
+                        placeholder="Contoh: SKU-ELC-001"
                         value={item.sku}
                         onChange={(e) => {
                           const copy = [...items]
                           copy[idx].sku = e.target.value
                           setItems(copy)
                         }}
-                        className="w-1/3 px-3 py-1.5 rounded-lg border border-zinc-200 bg-zinc-50 font-mono text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                        className="w-1/3 px-3 py-1.5 rounded-lg border border-zinc-200 bg-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                       />
                       <input
                         type="text"
-                        placeholder="Nama Komponen"
+                        placeholder="Contoh: Microcontroller Unit V2"
                         value={item.name}
                         onChange={(e) => {
                           const copy = [...items]
                           copy[idx].name = e.target.value
                           setItems(copy)
                         }}
-                        className="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 bg-zinc-50 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                        className="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 bg-white text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                       />
                       <input
                         type="number"
                         placeholder="Qty"
-                        value={item.qty}
+                        value={item.qty === 0 ? '' : item.qty}
                         onChange={(e) => {
                           const copy = [...items]
                           copy[idx].qty = parseInt(e.target.value, 10) || 0
                           setItems(copy)
                         }}
-                        className="w-20 px-3 py-1.5 rounded-lg border border-zinc-200 bg-zinc-50 font-mono text-xs text-right focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                        className="w-20 px-3 py-1.5 rounded-lg border border-zinc-200 bg-white font-mono text-xs text-right focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                       />
                       <button
+                        type="button"
                         onClick={() => handleRemoveItem(idx)}
                         className="p-1.5 text-zinc-400 hover:text-rose-600 rounded"
                       >
@@ -491,20 +560,25 @@ export function UnifiedManifestPipeline() {
                 </div>
               </div>
 
-              {/* Secret Note */}
-              <div>
-                <label className="block text-xs font-semibold text-zinc-700 mb-1 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
+              {/* Secret Note with Clear TextView Clue */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-700 flex items-center gap-1.5">
                     <Lock className="w-3.5 h-3.5 text-zinc-500" />
-                    Catatan Rahasia (Terenkripsi Khusus Gudang Penerima)
-                  </span>
-                  <span className="text-[11px] text-zinc-400 font-normal">Hanya Gudang C yang dapat membaca</span>
-                </label>
+                    Catatan Rahasia (Encrypted Secret Note)
+                  </label>
+                  <span className="text-[11px] text-zinc-400">Terenkripsi Kunci Publik C (e_C)</span>
+                </div>
+                <p className="text-[11px] text-zinc-500 leading-relaxed bg-zinc-50/80 p-2.5 rounded-xl border border-zinc-200/60">
+                  💡 <strong>Petunjuk (Clue):</strong> Masukkan instruksi khusus atau kode segel fisik gembok kontainer. Teks ini
+                  dienkripsi secara asimetris khusus untuk Gudang Tujuan sehingga supir maupun satpam pos tidak dapat membacanya.
+                </p>
                 <textarea
                   rows={2}
                   value={secretNote}
                   onChange={(e) => setSecretNote(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                  placeholder="Contoh: KODE SEGEL FISIK: SEC-8842-ALPHA. Cocokkan segel kontainer nomor #00921 sebelum pembongkaran muatan."
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white placeholder:text-zinc-400 text-xs text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                 />
               </div>
 
@@ -564,21 +638,25 @@ export function UnifiedManifestPipeline() {
               {/* Officer Parameters */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <label className="block text-zinc-600 font-medium mb-1">ID Petugas Gerbang</label>
+                  <label className="block text-zinc-700 font-semibold mb-0.5">ID Petugas Gerbang (Satpam)</label>
+                  <span className="block text-[11px] text-zinc-400 mb-1">Identitas petugas yang memeriksa fisik truk</span>
                   <input
                     type="text"
                     value={officerId}
                     onChange={(e) => setOfficerId(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                    placeholder="Contoh: OFFICER-B01"
+                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white font-mono text-zinc-900 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                   />
                 </div>
                 <div>
-                  <label className="block text-zinc-600 font-medium mb-1">Pos Gerbang (Gate ID)</label>
+                  <label className="block text-zinc-700 font-semibold mb-0.5">Pos Gerbang (Gate ID)</label>
+                  <span className="block text-[11px] text-zinc-400 mb-1">Nomor pos keluar tempat inspeksi dilakukan</span>
                   <input
                     type="text"
                     value={gateId}
                     onChange={(e) => setGateId(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                    placeholder="Contoh: GATE-OUT-01"
+                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white font-mono text-zinc-900 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 shadow-subtle"
                   />
                 </div>
               </div>
