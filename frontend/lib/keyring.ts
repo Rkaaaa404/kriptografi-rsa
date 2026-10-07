@@ -48,42 +48,42 @@ export const ACADEMIC_KEYS: { A: Keypair; B: Keypair; C: Keypair } = {
   },
 }
 
-export const SAMPLE_64BIT_KEYS: { A: Keypair; B: Keypair; C: Keypair } = {
+export const SAMPLE_32BIT_SAFE_KEYS: { A: Keypair; B: Keypair; C: Keypair } = {
   A: {
     entity: 'A',
-    p: 2965629853,
-    q: 3512210077,
-    n: 10415915054358628681,
-    phi: 10415915047880788752,
+    p: 37549,
+    q: 34667,
+    n: 1301711183,
+    phi: 1301638968,
     e: 65537,
-    d: 7103934736258533281,
-    pub_key: [65537, 10415915054358628681],
-    priv_key: [7103934736258533281, 10415915054358628681],
-    bit_length: 64,
+    d: 571384889,
+    pub_key: [65537, 1301711183],
+    priv_key: [571384889, 1301711183],
+    bit_length: 31,
   },
   B: {
     entity: 'B',
-    p: 3030705913,
-    q: 3445704799,
-    n: 10442917908781776487,
-    phi: 10442917902305365776,
+    p: 53657,
+    q: 51407,
+    n: 2758345399,
+    phi: 2758240336,
     e: 65537,
-    d: 4205243547305200241,
-    pub_key: [65537, 10442917908781776487],
-    priv_key: [4205243547305200241, 10442917908781776487],
-    bit_length: 64,
+    d: 1974500593,
+    pub_key: [65537, 2758345399],
+    priv_key: [1974500593, 2758345399],
+    bit_length: 32,
   },
   C: {
     entity: 'C',
-    p: 3625756891,
-    q: 3927791519,
-    n: 14241217166425607429,
-    phi: 14241217158872059020,
+    p: 42457,
+    q: 62723,
+    n: 2663030411,
+    phi: 2662925232,
     e: 65537,
-    d: 9340223646791853653,
-    pub_key: [65537, 14241217166425607429],
-    priv_key: [9340223646791853653, 14241217166425607429],
-    bit_length: 64,
+    d: 1284999473,
+    pub_key: [65537, 2663030411],
+    priv_key: [1284999473, 2663030411],
+    bit_length: 32,
   },
 }
 
@@ -95,17 +95,34 @@ export function loadKeyringFromStorage(): KeyringState {
   const parse = (key: string): Keypair | null => {
     try {
       const raw = localStorage.getItem(key)
-      return raw ? JSON.parse(raw) : null
+      if (!raw) return null
+      const parsed = JSON.parse(raw) as Keypair
+      // Guard against JavaScript floating point precision loss:
+      // If modulus n exceeds Number.MAX_SAFE_INTEGER, the key cannot be accurately processed by JS.
+      const modN = parsed.n ?? parsed.pub_key?.[1]
+      if (typeof modN === 'number' && (modN > Number.MAX_SAFE_INTEGER || modN <= 1)) {
+        localStorage.removeItem(key)
+        return null
+      }
+      return parsed
     } catch {
       return null
     }
   }
 
-  return {
+  const keys = {
     A: parse('securepass_key_A'),
     B: parse('securepass_key_B'),
     C: parse('securepass_key_C'),
   }
+
+  // If any entity key is missing or was cleared due to precision overflow, auto-heal with academic keys
+  if (!keys.A || !keys.B || !keys.C) {
+    saveKeyringToStorage(ACADEMIC_KEYS)
+    return { ...ACADEMIC_KEYS }
+  }
+
+  return keys
 }
 
 export function saveKeyringToStorage(keys: { A?: Keypair | null; B?: Keypair | null; C?: Keypair | null }) {
@@ -119,8 +136,8 @@ export function saveKeyringToStorage(keys: { A?: Keypair | null; B?: Keypair | n
   window.dispatchEvent(new Event('securepass_keyring_updated'))
 }
 
-export function applyKeyPreset(preset: 'academic' | '64bit') {
-  const chosen = preset === 'academic' ? ACADEMIC_KEYS : SAMPLE_64BIT_KEYS
+export function applyKeyPreset(preset: 'academic' | '32bit') {
+  const chosen = preset === 'academic' ? ACADEMIC_KEYS : SAMPLE_32BIT_SAFE_KEYS
   saveKeyringToStorage(chosen)
   return chosen
 }

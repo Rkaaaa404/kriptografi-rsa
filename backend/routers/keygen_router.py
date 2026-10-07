@@ -13,8 +13,10 @@ router = APIRouter()
 
 @router.post("/generate", response_model=KeypairResponse)
 def generate_key(req: GenerateKeyRequest) -> KeypairResponse:
-    """Generate a fresh RSA keypair."""
-    result = generate_keypair(bits=req.bits, e_manual=req.e_manual)
+    # Ensure n does not exceed JavaScript's Number.MAX_SAFE_INTEGER (2^53 - 1)
+    # For a requested RSA modulus of `bits`, each prime p, q is bits // 2.
+    prime_bits = max(8, req.bits // 2) if req.bits >= 24 else req.bits
+    result = generate_keypair(bits=prime_bits, e_manual=req.e_manual)
     p = result["params"]["p"]
     q = result["params"]["q"]
     phi = result["params"]["phi"]

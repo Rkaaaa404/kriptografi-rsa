@@ -91,6 +91,26 @@ export function UnifiedManifestPipeline() {
     return () => window.removeEventListener('securepass_keyring_updated', syncKeys)
   }, [])
 
+  // Auto-verify gate pass when transitioning to Step 2
+  useEffect(() => {
+    if (currentStep === 2 && tokenBase64 && keyring.A?.pub_key && !gateVerifyResult) {
+      setIsVerifyingGate(true)
+      api.gateVerify({
+        token_base64: tokenBase64,
+        pub_key_a: keyring.A.pub_key,
+      })
+        .then((res) => {
+          setGateVerifyResult(res)
+        })
+        .catch((err) => {
+          console.warn('Auto gate verify error', err)
+        })
+        .finally(() => {
+          setIsVerifyingGate(false)
+        })
+    }
+  }, [currentStep, tokenBase64, keyring.A, gateVerifyResult])
+
   const handleLoadSampleData = () => {
     setIssuerEntity('PPIC Dept (Surabaya Plant-1)')
     setOrigin('Pabrik Surabaya (Plant-1)')
@@ -183,8 +203,19 @@ export function UnifiedManifestPipeline() {
         isReceived: false,
       })
       localStorage.setItem('last_token', res.token_base64)
-
       toast.success('Surat Jalan Berhasil Diterbitkan & Ditandatangani PPIC!')
+
+      // Run immediate gate verification on the generated token
+      try {
+        const vRes = await api.gateVerify({
+          token_base64: res.token_base64,
+          pub_key_a: keyring.A.pub_key,
+        })
+        setGateVerifyResult(vRes)
+      } catch (e) {
+        console.warn('Initial gate verify error', e)
+      }
+
       // Auto-progress to Step 2
       setCurrentStep(2)
     } catch (err: unknown) {
@@ -665,25 +696,42 @@ export function UnifiedManifestPipeline() {
               </div>
 
               {/* Diagnostic Box if already verified */}
-              {gateVerifyResult && (
+              {isVerifyingGate && (
+                <div className="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-600 text-xs flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin text-zinc-500" />
+                  <span>Memverifikasi tanda tangan digital &amp; memeriksa nonce...</span>
+                </div>
+              )}
+
+              {!isVerifyingGate && gateVerifyResult && (
                 <div
-                  className={`p-3.5 rounded-xl border text-xs space-y-1 ${
+                  className={`p-4 rounded-xl border text-xs space-y-2 ${
                     gateVerifyResult.valid
-                      ? 'bg-emerald-50/60 border-emerald-200 text-emerald-900'
-                      : 'bg-rose-50/60 border-rose-200 text-rose-900'
+                      ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
+                      : 'bg-rose-50/70 border-rose-200 text-rose-900'
                   }`}
                 >
-                  <div className="font-semibold flex items-center gap-1.5">
+                  <div className="font-semibold flex items-center gap-2 text-sm">
                     {gateVerifyResult.valid ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     ) : (
                       <AlertCircle className="w-4 h-4 text-rose-600" />
                     )}
-                    <span>{gateVerifyResult.message}</span>
+                    <span>
+                      {gateVerifyResult.valid
+                        ? 'Dokumen Sah & Tanda Tangan PPIC Otentik! Lolos Pos Gerbang'
+                        : gateVerifyResult.message}
+                    </span>
                   </div>
+                  <p className="text-[11px] opacity-90 leading-relaxed">
+                    {gateVerifyResult.valid
+                      ? 'Integritas muatan fisik terbukti secara matematis: H(M) cocok dengan signature S_A. Nonce belum pernah dipakai. Truk diizinkan keluar setelah diberi counter-sign.'
+                      : 'Perhatian: Nilai hash manifest tidak sesuai dengan signature primer atau token sudah pernah diproses.'}
+                  </p>
                   {gateVerifyResult.digest_expected !== undefined && (
-                    <div className="font-mono text-[11px] text-zinc-600">
-                      Digest Hash: {gateVerifyResult.digest_expected} | Recovered: {gateVerifyResult.digest_recovered}
+                    <div className="font-mono text-[11px] pt-1 border-t border-emerald-200/60 text-zinc-600 flex items-center gap-4">
+                      <span>Digest Expected: <strong>{gateVerifyResult.digest_expected}</strong></span>
+                      <span>Digest Recovered: <strong>{gateVerifyResult.digest_recovered}</strong></span>
                     </div>
                   )}
                 </div>
@@ -699,8 +747,10 @@ export function UnifiedManifestPipeline() {
                   <ShieldCheck className={`w-4 h-4 ${isClearingGate ? 'animate-spin' : ''}`} />
                   <span>
                     {isClearingGate
-                      ? 'Memverifikasi Hash & Counter-Signing...'
-                      : 'Verifikasi & Berikan Clearance Gerbang →'}
+                      ? 'Membubuhkan Counter-Signature Satpam...'
+                      : gateVerifyResult?.valid
+                      ? 'Bubuhkan Counter-Signature & Berikan Clearance Gerbang →'
+                      : 'Periksa & Berikan Clearance Gerbang →'}
                   </span>
                 </button>
               </div>

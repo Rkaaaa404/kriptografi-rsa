@@ -19,13 +19,13 @@ export function KeyringQuickSetup() {
     return () => window.removeEventListener('securepass_keyring_updated', syncKeys)
   }, [])
 
-  const handleApplyPreset = (preset: 'academic' | '64bit') => {
+  const handleApplyPreset = (preset: 'academic' | '32bit') => {
     applyKeyPreset(preset)
     syncKeys()
     toast.success(
       preset === 'academic'
         ? 'Kunci Kuliah Berhasil Diaktifkan! (PPIC: p=47, q=71, e=79, d=1019)'
-        : 'Kunci 64-bit Sample Berhasil Diaktifkan untuk 3 Entitas!'
+        : 'Kunci 32-bit Multi-Entitas Berhasil Diaktifkan!'
     )
     setIsOpen(false)
   }
@@ -149,10 +149,10 @@ export function KeyringQuickSetup() {
               </button>
 
               <button
-                onClick={() => handleApplyPreset('64bit')}
+                onClick={() => handleApplyPreset('32bit')}
                 className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg transition-colors text-left"
               >
-                <span>Sample 64-bit Multi-Entitas</span>
+                <span>Sample 32-bit Multi-Entitas</span>
                 <span className="text-[10px] text-zinc-400">Standard</span>
               </button>
 
