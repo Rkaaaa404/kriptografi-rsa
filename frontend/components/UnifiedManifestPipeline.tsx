@@ -17,6 +17,8 @@ import {
   Unlock,
   KeyRound,
   RotateCcw,
+  Check,
+  Info,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
@@ -317,7 +319,7 @@ export function UnifiedManifestPipeline() {
                   : 'bg-zinc-100 text-zinc-500'
               }`}
             >
-              {stepStatus.isIssued ? '✓' : '1'}
+              {stepStatus.isIssued ? <Check className="w-3 h-3 text-emerald-800" /> : '1'}
             </div>
             <div>
               <div className="font-semibold">PPIC</div>
@@ -343,7 +345,7 @@ export function UnifiedManifestPipeline() {
                   : 'bg-zinc-100 text-zinc-500'
               }`}
             >
-              {stepStatus.isGateCleared ? '✓' : '2'}
+              {stepStatus.isGateCleared ? <Check className="w-3 h-3 text-emerald-800" /> : '2'}
             </div>
             <div>
               <div className="font-semibold">Pos Gerbang</div>
@@ -369,7 +371,7 @@ export function UnifiedManifestPipeline() {
                   : 'bg-zinc-100 text-zinc-500'
               }`}
             >
-              {stepStatus.isReceived ? '✓' : '3'}
+              {stepStatus.isReceived ? <Check className="w-3 h-3 text-emerald-800" /> : '3'}
             </div>
             <div>
               <div className="font-semibold">Gudang Penerima</div>
@@ -570,7 +572,8 @@ export function UnifiedManifestPipeline() {
                   <span className="text-[11px] text-zinc-400">Terenkripsi Kunci Publik C (e_C)</span>
                 </div>
                 <p className="text-[11px] text-zinc-500 leading-relaxed bg-zinc-50/80 p-2.5 rounded-xl border border-zinc-200/60">
-                  💡 <strong>Petunjuk (Clue):</strong> Masukkan instruksi khusus atau kode segel fisik gembok kontainer. Teks ini
+                  <Info className="w-3.5 h-3.5 inline mr-1 text-zinc-600" />
+                  <strong>Petunjuk:</strong> Masukkan instruksi khusus atau kode segel fisik gembok kontainer. Teks ini
                   dienkripsi secara asimetris khusus untuk Gudang Tujuan sehingga supir maupun satpam pos tidak dapat membacanya.
                 </p>
                 <textarea

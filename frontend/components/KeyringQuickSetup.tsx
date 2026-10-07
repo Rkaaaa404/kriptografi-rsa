@@ -60,14 +60,14 @@ export function KeyringQuickSetup() {
         <KeyRound className="w-3.5 h-3.5 text-zinc-500" />
         <span className="hidden sm:inline text-zinc-500">Keyring:</span>
         <div className="flex items-center gap-1 font-mono text-[11px]">
-          <span className={`px-1 rounded ${keyring.A ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'bg-zinc-100 text-zinc-400'}`}>
-            A:{keyring.A ? '✓' : '—'}
+          <span className={`px-1.5 py-0.5 rounded flex items-center gap-0.5 ${keyring.A ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'bg-zinc-100 text-zinc-400'}`}>
+            A:{keyring.A ? <Check className="w-2.5 h-2.5" /> : '—'}
           </span>
-          <span className={`px-1 rounded ${keyring.B ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'bg-zinc-100 text-zinc-400'}`}>
-            B:{keyring.B ? '✓' : '—'}
+          <span className={`px-1.5 py-0.5 rounded flex items-center gap-0.5 ${keyring.B ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'bg-zinc-100 text-zinc-400'}`}>
+            B:{keyring.B ? <Check className="w-2.5 h-2.5" /> : '—'}
           </span>
-          <span className={`px-1 rounded ${keyring.C ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'bg-zinc-100 text-zinc-400'}`}>
-            C:{keyring.C ? '✓' : '—'}
+          <span className={`px-1.5 py-0.5 rounded flex items-center gap-0.5 ${keyring.C ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'bg-zinc-100 text-zinc-400'}`}>
+            C:{keyring.C ? <Check className="w-2.5 h-2.5" /> : '—'}
           </span>
         </div>
         <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
