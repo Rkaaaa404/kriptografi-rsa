@@ -65,6 +65,9 @@ def generate_keypair(
         (1019, 3337)
     """
     # --- Obtain p and q ---
+    if (p_manual is None) != (q_manual is None):
+        raise ValueError("Both p_manual and q_manual must be provided together")
+
     if p_manual is not None and q_manual is not None:
         p, q = p_manual, q_manual
         if not miller_rabin(p, k=20):
@@ -87,21 +90,24 @@ def generate_keypair(
     # --- Determine public exponent e ---
     if e_manual is not None:
         e = e_manual
+        if not (1 < e < phi):
+            raise ValueError(f"e_manual={e} must satisfy 1 < e < phi={phi}")
         if gcd(e, phi) != 1:
             raise ValueError(
                 f"e_manual={e} is not coprime to phi={phi}: "
                 f"gcd={gcd(e, phi)}"
             )
     else:
-        # Prefer the standard 65537 first
-        if gcd(65537, phi) == 1:
+        # Prefer the standard 65537 only if e < phi and coprime
+        if 65537 < phi and gcd(65537, phi) == 1:
             e = 65537
         else:
-            # Fall back to smallest odd integer coprime to phi (≥ 3)
+            # Fall back to smallest odd integer coprime to phi (≥ 3) and < phi
             e = 3
-            while gcd(e, phi) != 1:
+            while e < phi and gcd(e, phi) != 1:
                 e += 2
-
+            if e >= phi:
+                raise ValueError(f"Could not find suitable public exponent e < phi={phi}")
     # --- Compute private exponent d ---
     d = mod_inverse(e, phi)
 
@@ -233,6 +239,8 @@ def verify(digest: int, signature: int, pub_key: tuple[int, int]) -> bool:
         True if signature is authentic, False otherwise.
     """
     e, n = pub_key
+    if not (0 <= signature < n):
+        return False
     recovered = mod_exp(signature, e, n)
     return recovered == (digest % n)
 

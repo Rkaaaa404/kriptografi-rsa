@@ -212,9 +212,12 @@ def mod_exp(
         >>> mod_exp(c, 1019, 3337)
         65
     """
+    if mod <= 0:
+        raise ValueError(f"Modulus must be positive, got {mod}")
+    if exp < 0:
+        raise ValueError(f"Exponent must be non-negative, got {exp}")
     if mod == 1:
         return 0
-
     result = 1
     base = base % mod
     bit_index = 0

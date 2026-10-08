@@ -451,5 +451,75 @@ class TestPolynomialHashing(unittest.TestCase):
         self.assertGreaterEqual(val, 0)
 
 
+
+class TestAuditFixesAndRobustness(unittest.TestCase):
+    """Regression tests for audit findings F4, F6, F9 and input guards."""
+
+    def test_f4_signature_malleability_rejected(self):
+        """F4: verify() must reject signatures with s >= n or s < 0."""
+        kp = generate_keypair(p_manual=47, q_manual=71, e_manual=79)
+        pub_key = kp["public_key"]
+        priv_key = kp["private_key"]
+        e, n = pub_key
+        digest = 1234
+
+        valid_sig = sign(digest, priv_key)
+        self.assertTrue(verify(digest, valid_sig, pub_key))
+
+        # Signature s + n must be rejected
+        malleable_sig = valid_sig + n
+        self.assertFalse(verify(digest, malleable_sig, pub_key))
+
+        # Negative signature must be rejected
+        self.assertFalse(verify(digest, -1, pub_key))
+
+    def test_f6_exponent_bounds_small_primes(self):
+        """F6: Key generation on small primes must guarantee e < phi."""
+        # p=5, q=11 -> n=55, phi=40 < 65537
+        kp = generate_keypair(p_manual=5, q_manual=11)
+        e, n = kp["public_key"]
+        phi = kp["params"]["phi"]
+        self.assertLess(e, phi)
+        self.assertGreater(e, 1)
+        self.assertEqual(gcd(e, phi), 1)
+
+    def test_f9_manual_params_validation(self):
+        """F9: Both p_manual and q_manual must be supplied together, and e < phi."""
+        # Only one prime supplied
+        with self.assertRaises(ValueError):
+            generate_keypair(p_manual=47)
+        with self.assertRaises(ValueError):
+            generate_keypair(q_manual=71)
+
+        # e >= phi must be rejected
+        with self.assertRaises(ValueError):
+            generate_keypair(p_manual=47, q_manual=71, e_manual=3220)
+        with self.assertRaises(ValueError):
+            generate_keypair(p_manual=47, q_manual=71, e_manual=4000)
+        with self.assertRaises(ValueError):
+            generate_keypair(p_manual=47, q_manual=71, e_manual=1)
+
+    def test_mod_exp_guards(self):
+        """Input guards for mod_exp: mod <= 0 or exp < 0 raises ValueError."""
+        with self.assertRaises(ValueError):
+            mod_exp(2, 5, 0)
+        with self.assertRaises(ValueError):
+            mod_exp(2, 5, -10)
+        with self.assertRaises(ValueError):
+            mod_exp(2, -1, 100)
+
+    def test_primes_guards(self):
+        """Input guards for Miller-Rabin and prime generation."""
+        with self.assertRaises(ValueError):
+            miller_rabin(47, k=0)
+        with self.assertRaises(ValueError):
+            miller_rabin(47, k=65)
+        with self.assertRaises(ValueError):
+            generate_prime_candidate(bits=1)
+        with self.assertRaises(ValueError):
+            generate_prime(bits=1)
+        with self.assertRaises(ValueError):
+            generate_prime(bits=8, k=0)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

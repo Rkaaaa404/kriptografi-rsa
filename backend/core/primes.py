@@ -133,6 +133,8 @@ def miller_rabin(
         >>> miller_rabin(48, k=5)
         False
     """
+    if not (1 <= k <= 64):
+        raise ValueError(f"k must be between 1 and 64, got {k}")
     # Deterministic small cases
     if n < 2:
         return False
@@ -201,6 +203,8 @@ def generate_prime_candidate(bits: int) -> int:
         >>> n % 2 == 1
         True
     """
+    if bits < 2:
+        raise ValueError(f"bits must be >= 2, got {bits}")
     n = random.getrandbits(bits)
     n |= (1 << (bits - 1))  # set MSB so bit length == bits
     n |= 1                   # set LSB so n is odd
@@ -238,6 +242,10 @@ def generate_prime(
         >>> miller_rabin(p, k=20)
         True
     """
+    if bits < 2:
+        raise ValueError(f"bits must be >= 2, got {bits}")
+    if not (1 <= k <= 64):
+        raise ValueError(f"k must be between 1 and 64, got {k}")
     while True:
         candidate = generate_prime_candidate(bits)
 
