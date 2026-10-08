@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import { api } from '@/lib/api'
-import type { InspectTraceResponse } from '@/types/api'
+import type { InspectTraceResponse, EncryptDecryptTraceResponse } from '@/types/api'
+import { loadKeyringFromStorage, ACADEMIC_KEYS } from '@/lib/keyring'
 import { toast } from 'sonner'
 import {
   Search,
@@ -15,9 +16,14 @@ import {
   Play,
   RefreshCw,
   Binary,
+  Lock,
+  Unlock,
+  ArrowRight,
+  Sparkles,
+  FileText,
 } from 'lucide-react'
 
-type TabType = 'eea' | 'miller_rabin' | 'mod_exp' | 'chunking'
+type TabType = 'eea' | 'miller_rabin' | 'mod_exp' | 'chunking' | 'standalone'
 
 export default function InspectorPage() {
   const [activeTab, setActiveTab] = useState<TabType>('eea')
@@ -44,6 +50,74 @@ export default function InspectorPage() {
   // Chunking Visualizer State
   const [chunkText, setChunkText] = useState<string>('Hello')
   const [chunkMod, setChunkMod] = useState<string>('3337')
+
+  // Standalone Encrypt-Decrypt State
+  const [standaloneText, setStandaloneText] = useState<string>('Rahasia Logistik: Truk Siap Muat Jalur 2')
+  const [standalonePreset, setStandalonePreset] = useState<'academic' | 'A' | 'B' | 'C' | 'custom'>('academic')
+  const [standalonePubKeyE, setStandalonePubKeyE] = useState<string>('79')
+  const [standalonePubKeyN, setStandalonePubKeyN] = useState<string>('3337')
+  const [standalonePrivKeyD, setStandalonePrivKeyD] = useState<string>('1019')
+  const [standalonePrivKeyN, setStandalonePrivKeyN] = useState<string>('3337')
+  const [standaloneWithDecrypt, setStandaloneWithDecrypt] = useState<boolean>(true)
+  const [standaloneLoading, setStandaloneLoading] = useState<boolean>(false)
+  const [standaloneResult, setStandaloneResult] = useState<EncryptDecryptTraceResponse | null>(null)
+
+  const handleSelectPreset = (preset: 'academic' | 'A' | 'B' | 'C' | 'custom') => {
+    setStandalonePreset(preset)
+    if (preset === 'academic') {
+      setStandalonePubKeyE('79')
+      setStandalonePubKeyN('3337')
+      setStandalonePrivKeyD('1019')
+      setStandalonePrivKeyN('3337')
+    } else if (preset === 'A' || preset === 'B' || preset === 'C') {
+      const keyring = loadKeyringFromStorage()
+      const kp = keyring[preset] || ACADEMIC_KEYS[preset]
+      if (kp) {
+        setStandalonePubKeyE(String(kp.pub_key[0]))
+        setStandalonePubKeyN(String(kp.pub_key[1]))
+        setStandalonePrivKeyD(String(kp.priv_key[0]))
+        setStandalonePrivKeyN(String(kp.priv_key[1]))
+      }
+    }
+  }
+
+  const handleRunStandalone = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    setStandaloneLoading(true)
+    try {
+      const eVal = parseInt(standalonePubKeyE.trim(), 10)
+      const nVal = parseInt(standalonePubKeyN.trim(), 10)
+      if (isNaN(eVal) || isNaN(nVal) || eVal <= 0 || nVal <= 1) {
+        toast.error('Kunci publik e dan n harus berupa bilangan bulat positif valid!')
+        setStandaloneLoading(false)
+        return
+      }
+
+      let privTuple: [number, number] | undefined = undefined
+      if (standaloneWithDecrypt) {
+        const dVal = parseInt(standalonePrivKeyD.trim(), 10)
+        const dN = parseInt(standalonePrivKeyN.trim(), 10)
+        if (isNaN(dVal) || isNaN(dN) || dVal <= 0 || dN <= 1) {
+          toast.error('Kunci privat d dan n harus berupa bilangan bulat positif valid!')
+          setStandaloneLoading(false)
+          return
+        }
+        privTuple = [dVal, dN]
+      }
+
+      const res = await api.inspectEncryptDecrypt({
+        text: standaloneText,
+        pub_key: [eVal, nVal],
+        priv_key: privTuple,
+      })
+      setStandaloneResult(res)
+      toast.success('Trace Enkripsi & Dekripsi Teks RSA berhasil dijalankan!')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Gagal mengeksekusi enkripsi-dekripsi')
+    } finally {
+      setStandaloneLoading(false)
+    }
+  }
 
   // Run EEA Trace
   const handleRunEea = async (e: React.FormEvent) => {
@@ -225,6 +299,18 @@ export default function InspectorPage() {
         >
           <Layers className="w-3.5 h-3.5" />
           <span>4. Chunking Visualizer</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('standalone')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap ${
+            activeTab === 'standalone'
+              ? 'bg-[#081c26] text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+          }`}
+        >
+          <Lock className="w-3.5 h-3.5" />
+          <span>5. Demo Enkripsi &amp; Dekripsi Teks Mandiri</span>
         </button>
       </div>
 
@@ -698,6 +784,339 @@ export default function InspectorPage() {
               </table>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TAB 5: STANDALONE TEXT ENCRYPTION & DECRYPTION DEMO */}
+      {activeTab === 'standalone' && (
+        <div className="space-y-6">
+          {/* Configuration Form Card */}
+          <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-finpay space-y-6">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-[#008579] text-xs font-semibold uppercase tracking-wider mb-2">
+                <Sparkles className="w-3.5 h-3.5" /> Demo Siklus Penuh RSA
+              </div>
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <Lock className="w-5 h-5 text-teal-600" />
+                Demo Enkripsi &amp; Dekripsi Teks Mandiri
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Uji coba mandiri siklus lengkap RSA di luar surat jalan: Teks UTF-8 &rarr; Byte &rarr; Blok Integer m<sub>i</sub> &lt; n &rarr; Ciphertext c<sub>i</sub> = m<sub>i</sub><sup>e</sup> mod n &rarr; Dekripsi m&#39;<sub>i</sub> = c<sub>i</sub><sup>d</sup> mod n &rarr; Rekonstruksi Teks Asli.
+              </p>
+            </div>
+
+            {/* Key Presets Selector */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-slate-700">Pilih Pasangan Kunci RSA:</label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: 'academic', label: 'Preset Akademik (p=47, q=71 -> n=3337)' },
+                  { id: 'A', label: 'Entitas A (PPIC)' },
+                  { id: 'B', label: 'Entitas B (Pos Gerbang)' },
+                  { id: 'C', label: 'Entitas C (Gudang Penerima)' },
+                  { id: 'custom', label: 'Kunci Kustom / Manual' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleSelectPreset(item.id as typeof standalonePreset)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                      standalonePreset === item.id
+                        ? 'bg-[#081c26] text-white shadow-sm'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Input Form */}
+            <form onSubmit={handleRunStandalone} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Teks Bebas untuk Dienkripsi:
+                </label>
+                <textarea
+                  rows={3}
+                  value={standaloneText}
+                  onChange={(e) => setStandaloneText(e.target.value)}
+                  placeholder="Masukkan teks bebas untuk dienkripsi..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-sans text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                />
+              </div>
+
+              {/* Key Parameters Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+                    <Lock className="w-3.5 h-3.5 text-teal-600" />
+                    <span>Kunci Publik Enkripsi (e, n)</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] text-slate-500 mb-1 font-mono">Eksponen Publik e:</label>
+                      <input
+                        type="text"
+                        value={standalonePubKeyE}
+                        onChange={(e) => {
+                          setStandalonePubKeyE(e.target.value)
+                          setStandalonePreset('custom')
+                        }}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-slate-500 mb-1 font-mono">Modulus n:</label>
+                      <input
+                        type="text"
+                        value={standalonePubKeyN}
+                        onChange={(e) => {
+                          setStandalonePubKeyN(e.target.value)
+                          setStandalonePreset('custom')
+                        }}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+                      <Unlock className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Kunci Privat Dekripsi (d, n)</span>
+                    </div>
+                    <label className="flex items-center gap-1.5 text-[11px] text-slate-600 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={standaloneWithDecrypt}
+                        onChange={(e) => setStandaloneWithDecrypt(e.target.checked)}
+                        className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                      />
+                      <span>Dekripsi Otomatis</span>
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] text-slate-500 mb-1 font-mono">Eksponen Privat d:</label>
+                      <input
+                        type="text"
+                        disabled={!standaloneWithDecrypt}
+                        value={standalonePrivKeyD}
+                        onChange={(e) => {
+                          setStandalonePrivKeyD(e.target.value)
+                          setStandalonePreset('custom')
+                        }}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-xs disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-slate-500 mb-1 font-mono">Modulus n (Privat):</label>
+                      <input
+                        type="text"
+                        disabled={!standaloneWithDecrypt}
+                        value={standalonePrivKeyN}
+                        onChange={(e) => {
+                          setStandalonePrivKeyN(e.target.value)
+                          setStandalonePreset('custom')
+                        }}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-xs disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={standaloneLoading || !standaloneText}
+                className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-medium text-xs transition-colors shadow-sm disabled:opacity-50"
+              >
+                {standaloneLoading ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Play className="w-3.5 h-3.5" />
+                )}
+                <span>{standaloneLoading ? 'Memproses Enkripsi & Dekripsi...' : 'Jalankan Enkripsi & Dekripsi Teks &rarr;'}</span>
+              </button>
+            </form>
+          </div>
+
+          {/* Standalone Results Container */}
+          {standaloneResult && (
+            <div className="space-y-6 animate-in fade-in duration-200">
+              {/* Overview Metrics Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
+                <div className="p-3.5 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+                  <span className="text-slate-500">Panjang Byte UTF-8:</span>
+                  <div className="text-base font-bold text-slate-900 mt-0.5">
+                    {standaloneResult.original_bytes_length} byte
+                  </div>
+                </div>
+                <div className="p-3.5 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+                  <span className="text-slate-500">Bit Modulus n:</span>
+                  <div className="text-base font-bold text-slate-900 mt-0.5">
+                    {standaloneResult.modulus_bits} bits
+                  </div>
+                </div>
+                <div className="p-3.5 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+                  <span className="text-slate-500">Kapasitas Blok (B):</span>
+                  <div className="text-base font-bold text-teal-700 mt-0.5">
+                    {standaloneResult.block_size_bytes} byte/blok
+                  </div>
+                </div>
+                <div className="p-3.5 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+                  <span className="text-slate-500">Status Keterbalikan:</span>
+                  <div className="mt-0.5">
+                    {standaloneResult.is_reversible === true ? (
+                      <span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> 100% Identik
+                      </span>
+                    ) : standaloneResult.decrypted_text ? (
+                      <span className="inline-flex items-center gap-1 text-rose-700 font-bold">
+                        <XCircle className="w-3.5 h-3.5" /> Tidak Cocok
+                      </span>
+                    ) : (
+                      <span className="text-slate-500 font-medium">Hanya Enkripsi</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Step Flow Breakdown */}
+              <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-finpay space-y-4">
+                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-teal-600" />
+                  Tahapan Alur Komputasi Kriptografi RSA Murni
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+                  {/* Tahap 1 & 2 */}
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
+                    <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center text-[10px]">1</span>
+                      <span>Teks Asli &amp; Representasi Byte UTF-8</span>
+                    </div>
+                    <div className="p-2 rounded bg-white border border-slate-200 break-all text-[11px]">
+                      <div className="text-slate-500">Teks: &quot;{standaloneResult.original_text}&quot;</div>
+                      <div className="text-teal-700 mt-1">Hex: {standaloneResult.original_bytes_hex}</div>
+                    </div>
+                  </div>
+
+                  {/* Tahap 3 & 4 */}
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
+                    <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center text-[10px]">2</span>
+                      <span>Ukuran Blok Adaptif B &amp; Enkripsi c<sub>i</sub> = m<sub>i</sub><sup>e</sup> mod n</span>
+                    </div>
+                    <div className="p-2 rounded bg-white border border-slate-200 break-all text-[11px]">
+                      <div className="text-slate-500">
+                        B = max(1, &lfloor;({standaloneResult.modulus_bits} - 1) / 8&rfloor;) = {standaloneResult.block_size_bytes} byte
+                      </div>
+                      <div className="text-indigo-700 mt-1">
+                        Ciphertext Blocks: [{standaloneResult.ciphertexts.join(', ')}]
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tahap 5 */}
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
+                    <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center text-[10px]">3</span>
+                      <span>Dekripsi Modular: m&#39;<sub>i</sub> = c<sub>i</sub><sup>d</sup> mod n</span>
+                    </div>
+                    <div className="p-2 rounded bg-white border border-slate-200 break-all text-[11px]">
+                      {standaloneResult.decrypted_text !== null ? (
+                        <div className="text-emerald-700">
+                          Nilai plaintext integer m&#39;<sub>i</sub> sukses dipulihkan dari seluruh {standaloneResult.blocks.length} blok.
+                        </div>
+                      ) : (
+                        <div className="text-slate-400">Dekripsi dilewati (Kunci privat tidak disediakan).</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tahap 6 */}
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
+                    <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center text-[10px]">4</span>
+                      <span>Rekonstruksi Teks Plaintext Pulih</span>
+                    </div>
+                    <div className="p-2 rounded bg-white border border-slate-200 break-all text-[11px]">
+                      {standaloneResult.decrypted_text !== null ? (
+                        <div className="font-bold text-slate-900">
+                          &quot;{standaloneResult.decrypted_text}&quot;
+                        </div>
+                      ) : (
+                        <div className="text-slate-400">Belum didekripsi.</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Per-Block Inspection Table */}
+              <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-finpay space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-teal-600" />
+                    Tabel Rincian Transformasi Matematis Per Blok
+                  </h3>
+                  <span className="text-xs text-slate-500 font-mono">
+                    Total {standaloneResult.blocks.length} blok integer
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto border border-slate-200/80 rounded-2xl">
+                  <table className="w-full text-xs text-left font-mono">
+                    <thead className="bg-slate-50 text-slate-600 border-b border-slate-200/80">
+                      <tr>
+                        <th className="px-3 py-2.5">Blok i</th>
+                        <th className="px-3 py-2.5">Byte Hex</th>
+                        <th className="px-3 py-2.5">Plaintext m<sub>i</sub></th>
+                        <th className="px-3 py-2.5">Rumus Enkripsi</th>
+                        <th className="px-3 py-2.5">Ciphertext c<sub>i</sub></th>
+                        <th className="px-3 py-2.5">Rumus Dekripsi</th>
+                        <th className="px-3 py-2.5">Pulih m&#39;<sub>i</sub></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      {standaloneResult.blocks.map((blk) => (
+                        <tr key={blk.block_index} className="hover:bg-slate-50/70">
+                          <td className="px-3 py-2 text-slate-400 font-semibold">#{blk.block_index}</td>
+                          <td className="px-3 py-2 font-mono text-teal-700">{blk.raw_bytes_hex}</td>
+                          <td className="px-3 py-2 font-bold text-slate-900">{blk.m}</td>
+                          <td className="px-3 py-2 text-slate-500">
+                            {blk.m}<sup>{standalonePubKeyE}</sup> mod {standalonePubKeyN}
+                          </td>
+                          <td className="px-3 py-2 font-bold text-indigo-700">{blk.c}</td>
+                          <td className="px-3 py-2 text-slate-500">
+                            {standaloneWithDecrypt ? (
+                              <>{blk.c}<sup>{standalonePrivKeyD}</sup> mod {standalonePrivKeyN}</>
+                            ) : (
+                              <span className="text-slate-300">-</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2">
+                            {blk.decrypted_m !== null && blk.decrypted_m !== undefined ? (
+                              <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[11px]">
+                                {blk.decrypted_m}
+                              </span>
+                            ) : (
+                              <span className="text-slate-300">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
