@@ -25,7 +25,7 @@ class GenerateKeyRequest(BaseModel):
         e_manual: Override public exponent; None means auto-select a valid e.
     """
 
-    bits: int = Field(default=32, ge=16, le=256, description="Bit-length of each prime p, q")
+    bits: int = Field(default=32, ge=16, le=52, description="Bit-length of each prime p, q (max 52 for JS safe integer)")
     entity: str = Field(default="A", pattern="^[ABC]$", description="Entity label: A | B | C")
     e_manual: Optional[int] = Field(default=None, description="Manual override for public exponent e")
 
@@ -332,6 +332,7 @@ class ClearanceRequest(BaseModel):
     """
 
     token_base64: str = Field(description="Base64-encoded GatePassPackage token")
+    pub_key_a: list[int] = Field(description="Entity-A public key [e, n] for primary signature verification")
     priv_key_b: list[int] = Field(description="Entity-B private key [d, n]")
     officer_id: str = Field(description="Gate officer identifier")
     gate_id: str = Field(default="GATE-OUT-01", description="Logical gate identifier")
@@ -434,3 +435,48 @@ class AttackResponse(BaseModel):
     error_code: str = Field(description="Machine-readable error code")
     details: dict[str, Any] = Field(description="Diagnostic intermediate values")
     message: str = Field(description="Human-readable detection explanation")
+
+
+# ─── Standalone Encryption & Decryption Trace ────────────────────────────────
+
+
+class EncryptDecryptBlockTrace(BaseModel):
+    """Trace details for a single chunk/block in text encryption/decryption."""
+
+    block_index: int = Field(description="0-based sequential block index")
+    raw_bytes_hex: str = Field(description="Hexadecimal representation of chunk bytes")
+    raw_bytes_int: list[int] = Field(description="List of integer byte values in chunk")
+    m: int = Field(description="Plaintext integer m < n")
+    c: int = Field(description="Ciphertext integer c = m^e mod n")
+    decrypted_m: Optional[int] = Field(default=None, description="Decrypted integer m' = c^d mod n")
+    decrypted_bytes_hex: Optional[str] = Field(
+        default=None, description="Hexadecimal representation of decrypted chunk bytes"
+    )
+
+
+class EncryptDecryptTraceRequest(BaseModel):
+    """Request for step-by-step RSA text encryption and optional decryption."""
+
+    text: str = Field(description="Plaintext string to encrypt and trace")
+    pub_key: list[int] = Field(description="Public key [e, n]")
+    priv_key: Optional[list[int]] = Field(
+        default=None, description="Optional private key [d, n] for decryption trace"
+    )
+
+
+class EncryptDecryptTraceResponse(BaseModel):
+    """Comprehensive trace of text encryption and optional decryption."""
+
+    original_text: str = Field(description="Original input string")
+    original_bytes_hex: str = Field(description="Hex string of input UTF-8 bytes")
+    original_bytes_length: int = Field(description="Total bytes in input UTF-8 string")
+    block_size_bytes: int = Field(description="Adaptive block size B in bytes")
+    modulus_bits: int = Field(description="Bit length of modulus n")
+    blocks: list[EncryptDecryptBlockTrace] = Field(description="Per-block computation traces")
+    ciphertexts: list[int] = Field(description="List of ciphertext block integers")
+    decrypted_text: Optional[str] = Field(
+        default=None, description="Reconstructed decrypted text (if priv_key provided)"
+    )
+    is_reversible: Optional[bool] = Field(
+        default=None, description="True if decrypted_text matches original_text"
+    )

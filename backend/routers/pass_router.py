@@ -1,6 +1,6 @@
 """APIRouter for Gate Pass issuance, gate verification, clearance, and receiving."""
-import base64
-import json
+from __future__ import annotations
+
 import uuid
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
@@ -25,38 +25,33 @@ from backend.core.rsa_engine import (
     decrypt_payload,
     mod_exp,
 )
-from backend.core.hashing import polynomial_hash
 from backend.routers.nonce_registry import nonce_registry
+from backend.routers.protocol import (
+    encode_token_package,
+    decode_token_package,
+    compute_primary_digest,
+    compute_clearance_digest,
+)
 
 router = APIRouter()
 
-def _package_to_base64(pkg_dict: dict) -> str:
-    compact_json = json.dumps(pkg_dict, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return base64.b64encode(compact_json.encode("utf-8")).decode("ascii")
-
-def _base64_to_package(token_base64: str) -> dict:
-    try:
-        decoded_bytes = base64.b64decode(token_base64)
-        return json.loads(decoded_bytes.decode("utf-8"))
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Invalid base64/JSON token: {exc}")
 
 @router.post("/issue", response_model=IssuePassResponse)
 def issue_pass(req: IssuePassRequest) -> IssuePassResponse:
-    """PPIC (Entity A) signs manifest and encrypts secret note for Entity C."""
-    manifest_canon = req.manifest.to_canonical_str()
-    digest_hash = polynomial_hash(manifest_canon)
-
+    """PPIC (Entity A) signs manifest payload and encrypts secret note for Entity C."""
     priv_a = (req.priv_key_a[0], req.priv_key_a[1])
     pub_c = (req.pub_key_c[0], req.pub_key_c[1])
 
-    # Digital signature S_A = (H % n)^d mod n
-    primary_sig = sign(digest_hash, priv_a)
+    nonce_val = uuid.uuid4().hex
 
     # Encrypt secret note using Entity C's public key
     encrypted_secret = encrypt_payload(req.secret_note, pub_c)
 
-    nonce_val = uuid.uuid4().hex
+    # Deterministic primary digest binding manifest header, nonce, and encrypted secret (F1 & F3)
+    digest_hash = compute_primary_digest(req.manifest, nonce_val, encrypted_secret)
+
+    # Digital signature S_A = (H % n)^d mod n
+    primary_sig = sign(digest_hash, priv_a)
 
     security_meta = SecurityLayer(
         key_size_bits_a=req.key_bits_a,
@@ -74,7 +69,7 @@ def issue_pass(req: IssuePassRequest) -> IssuePassResponse:
     )
 
     pkg_dict = package.model_dump()
-    token_b64 = _package_to_base64(pkg_dict)
+    token_b64 = encode_token_package(package)
 
     return IssuePassResponse(
         token_base64=token_b64,
@@ -83,11 +78,11 @@ def issue_pass(req: IssuePassRequest) -> IssuePassResponse:
         signature=primary_sig,
     )
 
+
 @router.post("/gate-verify", response_model=GateVerifyResponse)
 def gate_verify(req: GateVerifyRequest) -> GateVerifyResponse:
     """Security Guard (Entity B) verifies manifest integrity and checks replay/expiration."""
-    pkg_dict = _base64_to_package(req.token_base64)
-    package = GatePassPackage.model_validate(pkg_dict)
+    package = decode_token_package(req.token_base64)
 
     nonce_val = package.nonce
     if nonce_registry.is_replayed(nonce_val):
@@ -114,15 +109,14 @@ def gate_verify(req: GateVerifyRequest) -> GateVerifyResponse:
     except Exception:
         pass  # If date parsing fails, continue to signature check
 
-    # Verify primary signature
-    manifest_canon = package.header.to_canonical_str()
-    digest_expected = polynomial_hash(manifest_canon)
+    # Verify primary signature with unified digest (F1 & F3)
+    digest_expected = compute_primary_digest(package.header, package.nonce, package.encrypted_secret)
     pub_a = (req.pub_key_a[0], req.pub_key_a[1])
 
     is_sig_valid = verify(digest_expected, package.primary_signature, pub_a)
 
     # Recovered digest value for diagnostic display
-    recovered_digest = mod_exp(package.primary_signature, pub_a[0], pub_a[1])
+    recovered_digest = mod_exp(package.primary_signature, pub_a[0], pub_a[1]) if (0 <= package.primary_signature < pub_a[1]) else None
 
     if not is_sig_valid:
         return GateVerifyResponse(
@@ -144,11 +138,29 @@ def gate_verify(req: GateVerifyRequest) -> GateVerifyResponse:
         digest_recovered=recovered_digest,
     )
 
+
 @router.post("/gate-clearance", response_model=ClearanceResponse)
 def gate_clearance(req: ClearanceRequest) -> ClearanceResponse:
     """Security Guard (Entity B) approves gate clearance and counter-signs the pass."""
-    pkg_dict = _base64_to_package(req.token_base64)
-    package = GatePassPackage.model_validate(pkg_dict)
+    package = decode_token_package(req.token_base64)
+
+    # F2.3: Reject if pass nonce has already received gate clearance
+    if nonce_registry.is_replayed(package.nonce):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Pass nonce {package.nonce} has already been cleared. Replay clearance rejected.",
+        )
+
+    # F2.2: Verify authenticity of primary signature A before applying clearance
+    pub_a = (req.pub_key_a[0], req.pub_key_a[1])
+    expected_primary_digest = compute_primary_digest(
+        package.header, package.nonce, package.encrypted_secret
+    )
+    if not verify(expected_primary_digest, package.primary_signature, pub_a):
+        raise HTTPException(
+            status_code=400,
+            detail="Primary signature (Entity A) is invalid or manifest has been tampered.",
+        )
 
     now_iso = datetime.now(timezone.utc).isoformat()
     clearance = GateClearance(
@@ -158,19 +170,9 @@ def gate_clearance(req: ClearanceRequest) -> ClearanceResponse:
         status="APPROVED",
     )
 
-    manifest_canon = package.header.to_canonical_str()
-    clearance_canon = json.dumps(
-        {
-            "gate_id": clearance.gate_id,
-            "inspector_id": clearance.inspector_id,
-            "status": clearance.status,
-            "timestamp_inspected": clearance.timestamp_inspected,
-        },
-        sort_keys=True,
-        separators=(",", ":"),
+    clearance_digest = compute_clearance_digest(
+        package.header, clearance, package.primary_signature
     )
-    combined_input = manifest_canon + clearance_canon + str(package.primary_signature)
-    clearance_digest = polynomial_hash(combined_input)
 
     priv_b = (req.priv_key_b[0], req.priv_key_b[1])
     counter_sig = sign(clearance_digest, priv_b)
@@ -182,45 +184,33 @@ def gate_clearance(req: ClearanceRequest) -> ClearanceResponse:
     # Register nonce so it cannot be cleared twice
     nonce_registry.register(package.nonce, package.header.pass_id, stage="GATE_CLEARED")
 
-    updated_pkg_dict = package.model_dump()
-    updated_b64 = _package_to_base64(updated_pkg_dict)
+    updated_b64 = encode_token_package(package)
 
     return ClearanceResponse(
         updated_token_base64=updated_b64,
         clearance=clearance.model_dump(),
     )
 
+
 @router.post("/receive", response_model=ReceiveResponse)
 def receive_pass(req: ReceiveRequest) -> ReceiveResponse:
     """Destination Warehouse (Entity C) performs dual verification and decrypts confidential payload."""
-    pkg_dict = _base64_to_package(req.token_base64)
-    package = GatePassPackage.model_validate(pkg_dict)
+    package = decode_token_package(req.token_base64)
 
     pub_a = (req.pub_key_a[0], req.pub_key_a[1])
     pub_b = (req.pub_key_b[0], req.pub_key_b[1])
     priv_c = (req.priv_key_c[0], req.priv_key_c[1])
 
-    # 1. Verify Manifest Signature A
-    manifest_canon = package.header.to_canonical_str()
-    digest_a = polynomial_hash(manifest_canon)
+    # 1. Verify Manifest Signature A (F1 & F3: unified digest)
+    digest_a = compute_primary_digest(package.header, package.nonce, package.encrypted_secret)
     valid_a = verify(digest_a, package.primary_signature, pub_a)
 
     # 2. Verify Clearance Counter-Signature B
     valid_b = False
     if package.clearance and package.clearance.counter_signature is not None:
-        clearance = package.clearance
-        clearance_canon = json.dumps(
-            {
-                "gate_id": clearance.gate_id,
-                "inspector_id": clearance.inspector_id,
-                "status": clearance.status,
-                "timestamp_inspected": clearance.timestamp_inspected,
-            },
-            sort_keys=True,
-            separators=(",", ":"),
+        clearance_digest = compute_clearance_digest(
+            package.header, package.clearance, package.primary_signature
         )
-        combined_input = manifest_canon + clearance_canon + str(package.primary_signature)
-        clearance_digest = polynomial_hash(combined_input)
         valid_b = verify(clearance_digest, package.clearance.counter_signature, pub_b)
 
     if not valid_a:

@@ -31,7 +31,7 @@ if PROJECT_ROOT not in sys.path:
 from fastapi.testclient import TestClient
 from backend.main import app
 from backend.routers.nonce_registry import nonce_registry
-
+from backend.routers.protocol import encode_token_package, decode_token_package
 
 class TestApiE2E(unittest.TestCase):
     """End-to-end integration tests for FastAPI backend."""
@@ -247,6 +247,7 @@ class TestApiE2E(unittest.TestCase):
         # Step 3: Gate clearance approval counter-signed by Entity B
         clearance_req = {
             "token_base64": token_b64,
+            "pub_key_a": ent_a["pub_key"],
             "priv_key_b": ent_b["priv_key"],
             "officer_id": "SATPAM-BAMBANG-01",
             "gate_id": "GATE-OUT-01",
@@ -413,6 +414,7 @@ class TestApiE2E(unittest.TestCase):
             "/api/v1/pass/gate-clearance",
             json={
                 "token_base64": token_b64,
+                "pub_key_a": ent_a["pub_key"],
                 "priv_key_b": ent_b["priv_key"],
                 "officer_id": "GUARD-01",
                 "gate_id": "GATE-01",
@@ -444,6 +446,204 @@ class TestApiE2E(unittest.TestCase):
         self.assertEqual(res_atk.status_code, 200)
         self.assertEqual(res_atk.json()["status"], "REPLAY_ATTACK_DETECTED")
         self.assertEqual(res_atk.json()["error_code"], "TOKEN_ALREADY_USED")
+
+    # ─── 6. Regression & Security Audit Tests (F1, F2, F3, F7, F8) ────────────
+
+    def test_f1_nonce_tampering_breaks_signature(self):
+        """F1: Modifying nonce must break Entity A primary signature."""
+        ent_a, _, ent_c = self._generate_test_entities()
+        manifest = self._sample_manifest()
+        token_b64 = self.client.post(
+            "/api/v1/pass/issue",
+            json={
+                "manifest": manifest,
+                "secret_note": "Confidential",
+                "priv_key_a": ent_a["priv_key"],
+                "pub_key_c": ent_c["pub_key"],
+            },
+        ).json()["token_base64"]
+
+        # Tamper nonce manually in the package
+        pkg = decode_token_package(token_b64)
+        pkg.nonce = "forged-nonce-12345"
+        tampered_token = encode_token_package(pkg)
+
+        # Gate verify must reject with HASH_MISMATCH
+        res = self.client.post(
+            "/api/v1/pass/gate-verify",
+            json={"token_base64": tampered_token, "pub_key_a": ent_a["pub_key"]},
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(res.json()["valid"])
+        self.assertEqual(res.json()["error_code"], "HASH_MISMATCH")
+
+        # Also verify through attack simulator
+        res_atk = self.client.post(
+            "/api/v1/attack/simulate",
+            json={
+                "token_base64": token_b64,
+                "attack_type": "tamper",
+                "pub_key_a": ent_a["pub_key"],
+                "modifications": {"nonce": "another-forged-nonce"},
+            },
+        )
+        self.assertEqual(res_atk.status_code, 200)
+        self.assertEqual(res_atk.json()["status"], "TAMPERED")
+        self.assertEqual(res_atk.json()["error_code"], "HASH_MISMATCH")
+        self.assertFalse(res_atk.json()["details"]["is_signature_valid"])
+
+    def test_f2_clearance_verifies_signature_and_rejects_duplicate(self):
+        """F2: Gate clearance verifies primary signature and rejects duplicate clearance with 409."""
+        ent_a, ent_b, ent_c = self._generate_test_entities()
+        manifest = self._sample_manifest()
+        token_b64 = self.client.post(
+            "/api/v1/pass/issue",
+            json={
+                "manifest": manifest,
+                "secret_note": "Secret",
+                "priv_key_a": ent_a["priv_key"],
+                "pub_key_c": ent_c["pub_key"],
+            },
+        ).json()["token_base64"]
+
+        # 1. Attempt clearance with forged primary signature -> HTTP 400
+        pkg = decode_token_package(token_b64)
+        pkg.primary_signature = pkg.primary_signature + 1
+        bad_token = encode_token_package(pkg)
+
+        res_bad = self.client.post(
+            "/api/v1/pass/gate-clearance",
+            json={
+                "token_base64": bad_token,
+                "pub_key_a": ent_a["pub_key"],
+                "priv_key_b": ent_b["priv_key"],
+                "officer_id": "GUARD-01",
+            },
+        )
+        self.assertEqual(res_bad.status_code, 400)
+        self.assertIn("Primary signature", res_bad.json()["detail"])
+
+        # 2. Legitimate clearance -> HTTP 200
+        res_good = self.client.post(
+            "/api/v1/pass/gate-clearance",
+            json={
+                "token_base64": token_b64,
+                "pub_key_a": ent_a["pub_key"],
+                "priv_key_b": ent_b["priv_key"],
+                "officer_id": "GUARD-01",
+            },
+        )
+        self.assertEqual(res_good.status_code, 200)
+
+        # 3. Duplicate clearance with same token -> HTTP 409
+        res_dup = self.client.post(
+            "/api/v1/pass/gate-clearance",
+            json={
+                "token_base64": token_b64,
+                "pub_key_a": ent_a["pub_key"],
+                "priv_key_b": ent_b["priv_key"],
+                "officer_id": "GUARD-02",
+            },
+        )
+        self.assertEqual(res_dup.status_code, 409)
+        self.assertIn("already been cleared", res_dup.json()["detail"])
+
+    def test_f3_secret_memo_substitution_detected(self):
+        """F3: Modifying encrypted_secret breaks primary signature binding."""
+        ent_a, ent_b, ent_c = self._generate_test_entities()
+        manifest = self._sample_manifest()
+        token_b64 = self.client.post(
+            "/api/v1/pass/issue",
+            json={
+                "manifest": manifest,
+                "secret_note": "Legit Note",
+                "priv_key_a": ent_a["priv_key"],
+                "pub_key_c": ent_c["pub_key"],
+            },
+        ).json()["token_base64"]
+
+        # Substitute secret memo
+        pkg = decode_token_package(token_b64)
+        pkg.encrypted_secret = [999999]
+        tampered_token = encode_token_package(pkg)
+
+        # Gate verify must fail
+        res_verify = self.client.post(
+            "/api/v1/pass/gate-verify",
+            json={"token_base64": tampered_token, "pub_key_a": ent_a["pub_key"]},
+        )
+        self.assertEqual(res_verify.status_code, 200)
+        self.assertFalse(res_verify.json()["valid"])
+        self.assertEqual(res_verify.json()["error_code"], "HASH_MISMATCH")
+
+        # Receive must fail
+        res_receive = self.client.post(
+            "/api/v1/pass/receive",
+            json={
+                "token_base64": tampered_token,
+                "pub_key_a": ent_a["pub_key"],
+                "pub_key_b": ent_b["pub_key"],
+                "priv_key_c": ent_c["priv_key"],
+            },
+        )
+        self.assertEqual(res_receive.status_code, 200)
+        self.assertFalse(res_receive.json()["valid_a"])
+        self.assertEqual(res_receive.json()["error_code"], "INVALID_PRIMARY_SIGNATURE")
+
+    def test_f7_keygen_limits_and_safe_integer(self):
+        """F7: bits > 52 rejected by schema (HTTP 422), bits=48 produces n <= 2^53 - 1."""
+        # bits=64 exceeds le=52 -> HTTP 422
+        res_over = self.client.post("/api/v1/keys/generate", json={"bits": 64})
+        self.assertEqual(res_over.status_code, 422)
+
+        # bits=48 is safe for JavaScript IEEE-754 Number.MAX_SAFE_INTEGER
+        res_48 = self.client.post("/api/v1/keys/generate", json={"bits": 48})
+        self.assertEqual(res_48.status_code, 200)
+        data_48 = res_48.json()
+        self.assertLessEqual(data_48["n"], 2**53 - 1)
+
+    def test_f8_keygen_invalid_e_manual_returns_400(self):
+        """F8: Invalid e_manual returns HTTP 400 instead of 500 crash."""
+        # e=2 is even, never coprime to phi of primes > 2
+        res = self.client.post("/api/v1/keys/generate", json={"bits": 32, "e_manual": 2})
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("detail", res.json())
+
+    def test_inspect_trace_invalid_input_returns_400(self):
+        """Inspect trace returns HTTP 400 on ValueError."""
+        res = self.client.post(
+            "/api/v1/inspect/trace",
+            json={"algorithm": "mod_exp", "params": {"base": 2, "exp": -1, "mod": 10}},
+        )
+        self.assertEqual(res.status_code, 400)
+
+    def test_inspect_encrypt_decrypt_endpoint(self):
+        """Standalone RSA text encryption and decryption endpoint with full trace."""
+        payload = {
+            "text": "Halo Dunia RSA",
+            "pub_key": [79, 3337],
+            "priv_key": [1019, 3337],
+        }
+        res = self.client.post("/api/v1/inspect/encrypt-decrypt", json=payload)
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+
+        self.assertEqual(data["original_text"], "Halo Dunia RSA")
+        self.assertGreater(len(data["blocks"]), 0)
+        self.assertEqual(data["decrypted_text"], "Halo Dunia RSA")
+        self.assertTrue(data["is_reversible"])
+        self.assertEqual(len(data["ciphertexts"]), len(data["blocks"]))
+
+        # Test with pub_key only (no priv_key)
+        res_pub = self.client.post(
+            "/api/v1/inspect/encrypt-decrypt",
+            json={"text": "Tes Publik", "pub_key": [79, 3337]},
+        )
+        self.assertEqual(res_pub.status_code, 200)
+        data_pub = res_pub.json()
+        self.assertIsNone(data_pub["decrypted_text"])
+        self.assertIsNone(data_pub["is_reversible"])
+        self.assertGreater(len(data_pub["ciphertexts"]), 0)
 
 
 if __name__ == "__main__":
