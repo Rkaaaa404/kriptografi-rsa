@@ -6,10 +6,12 @@
 ## 1. Ringkasan Eksekutif & Identitas Proyek
 
 * **Nama Produk / Proyek:** `SecurePass RSA` (Digital Gate Pass & Delivery Order Integrity System)
-* **Mata Kuliah:** Kriptografi (Semester 5)
-* **Kategori Studi Kasus:** Manajemen Rantai Pasok & Pergudangan (*Warehouse Inbound & Outbound Security*)
-* **Batas Waktu Pengumpulan:** Senin, 21 Oktober 2024 pukul 10.00 WIB
-* **Target Anggota Tim:** 3 Orang (Cryptographic Engine, Security & Data Protocol, UI & Integration)
+* **Kategori:** Tugas Kriptografi
+* **Studi Kasus:** Manajemen Rantai Pasok & Pergudangan (*Warehouse Inbound & Outbound Security*)
+* **Anggota Tim:**
+  1. **Rayka Dharma Pranandita** — 5027241039 (Math & Cryptographic Engine Specialist)
+  2. **Yuan Bany Albyan** — 5027241027 (Security Protocol & FastAPI Backend Specialist)
+  3. **Evan Christian Nainggolan** — 5027241026 (Frontend Next.js & Integration Lead)
 * **Teknologi Terpilih (Client-Server Architecture):**
   * **Backend API:** Python 3.11+ dengan **FastAPI** + `uvicorn` & `pydantic` (Menjalankan core engine RSA from scratch, 0% library kriptografi).
   * **Frontend Web:** **Next.js (App Router)** + **TypeScript** + **TanStack Query** (`@tanstack/react-query` untuk Client-Side Fetching / CSF & state caching) + **Tailwind CSS**.
@@ -280,7 +282,7 @@ rsa-warehouse-gatepass/
 
 Agar pembagian kerja seimbang dan masing-masing anggota memiliki kontribusi nyata saat presentasi perkenalan diri (Nama & NRP) di video YouTube serta laporan Word, berikut pembagian perannya:
 
-* **Anggota 1 — Core Cryptographic & Math Engine Specialist:**
+* **Rayka Dharma Pranandita (5027241039) — Core Cryptographic & Math Engine Specialist:**
   * Implementasi modul matematika dasar dari nol (`math_utils.py`, `primes.py`):
     * Pembangkitan bilangan prima acak dan pengujian keprimaan (*Miller-Rabin* / *Trial Division*).
     * Perhitungan $\gcd(a, b)$ dan *Extended Euclidean Algorithm (EEA)* untuk mencari invers modular $d$.
@@ -288,7 +290,7 @@ Agar pembagian kerja seimbang dan masing-masing anggota memiliki kontribusi nyat
   * Modul `inspector.py`: Logging dan pengeksposan trace komputasi per langkah (tabel EEA dan trace bit eksponen).
   * Bukti perhitungan manual angka kecil untuk bab laporan Word.
 
-* **Anggota 2 — Security Protocol, Multi-Party Pipeline & FastAPI Backend:**
+* **Yuan Bany Albyan (5027241027) — Security Protocol, Multi-Party Pipeline & FastAPI Backend:**
   * Implementasi modul protokol data (`hashing.py`, `rsa_engine.py`):
     * Logika *Encoding/Decoding* dan *Blocking/Chunking* teks menjadi blok integer $m_i < n$ serta penggabungan kembali.
     * Implementasi fungsi digest hash dokumen dari nol.
@@ -296,7 +298,7 @@ Agar pembagian kerja seimbang dan masing-masing anggota memiliki kontribusi nyat
     * Penanganan pencegahan *replay attack* (nonce/timestamp validation) & serialisasi token Base64/JSON.
   * Pembangunan REST API Backend dengan **FastAPI** (`backend/routers/` & `backend/models/schemas.py`).
 
-* **Anggota 3 — Frontend Next.js (TypeScript), TanStack Query & Video/Report Lead:**
+* **Evan Christian Nainggolan (5027241026) — Frontend Next.js (TypeScript), TanStack Query & Integration Lead:**
   * Perancangan antarmuka modern Web SPA/SSR menggunakan **Next.js (App Router)** dan **TypeScript**:
     * Integrasi **TanStack Query** (`@tanstack/react-query`) untuk Client-Side Fetching (CSF), caching, status loading/error, dan mutations.
     * Pembuatan 6 halaman fungsional: Dashboard, Key Management, Crypto Inspector, Issue Gate Pass, Gate Clearance, Receiving Point, dan Attack Lab Suite.

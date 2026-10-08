@@ -1,7 +1,11 @@
 # SecurePass RSA: Sistem Otorisasi & Verifikasi Surat Jalan Pabrik
 
-> **Tugas Besar Kriptografi (Semester 5)** — Implementasi Algoritma Kunci-Publik RSA Murni (*0% External Cryptographic Library*)  
-> **Batas Pengumpulan**: Senin, 21 Oktober 2024 pukul 10.00 WIB
+> **Tugas Kriptografi** — Implementasi Algoritma Kunci-Publik RSA Murni (*0% External Cryptographic Library*)
+
+### 👥 Anggota Kelompok:
+- **Evan Christian Nainggolan** — 5027241026
+- **Yuan Bany Albyan** — 5027241027
+- **Rayka Dharma Pranandita** — 5027241039
 
 ---
 
@@ -36,11 +40,6 @@ Aplikasi dibangun menggunakan pola arsitektur **Client-Server Terpisah (*Decoupl
 
 ```text
 rsa/
-├── docs/                                  # Pusat Dokumentasi Resmi Proyek
-│   ├── 01-rangkuman-materi-rsa.md         # Silabus, landasan teori, & syarat tugas kuliah
-│   ├── 02-prd-securepass-rsa.md           # Product Requirement Document (PRD)
-│   ├── 03-technical-design.md             # Technical System Design & REST API contracts
-│   └── 04-task-roadmap.md                 # Rencana kerja & task breakdown per role (3 orang)
 ├── backend/                               # Layanan Backend FastAPI & Core Crypto
 │   ├── core/                              # 100% Algoritma Matematika RSA Murni
 │   │   ├── math_utils.py                  # gcd, extended_euclidean, mod_inverse, mod_exp
@@ -77,14 +76,6 @@ rsa/
 │   ├── package.json
 │   └── tsconfig.json
 ├── data/samples/                          # Data uji coba siap-pakai (JSON manifest & keys)
-├── .agents/                               # Pedoman agen AI & aturan rekayasa perangkat lunak
-│   ├── rules/
-│   │   └── engineering-discipline.md      # Disiplin kode Karpathy, Ponytail, & zero-crypto lib
-│   └── skills/                            # Keahlian terstandarisasi untuk proyek ini
-│       ├── rsa-core-math/                 # Panduan implementasi matematika RSA manual
-│       ├── fastapi-backend-protocol/      # Panduan arsitektur REST API & protokol keamanan
-│       ├── nextjs-tanstack-frontend/      # Panduan Next.js, TanStack Query, & Tailwind
-│       └── academic-presentation-and-report/# Panduan video YouTube & format laporan Word
 └── README.md
 ```
 
@@ -96,9 +87,9 @@ Setiap anggota memiliki porsi yang seimbang dan kepemilikan file yang jelas:
 
 | Peran | Anggota & Fokus | File Kepemilikan | Bagian Video Demo YouTube |
 | :--- | :--- | :--- | :--- |
-| **ROLE 1** | **Math & Cryptographic Core Specialist**<br>• Algoritma prima, $\gcd$, EEA, Square-and-Multiply.<br>• Engine pencatat jejak matematika (`inspector.py`).<br>• Perhitungan manual angka modul kuliah ($p=47, q=71, e=79$). | `backend/core/primes.py`<br>`backend/core/math_utils.py`<br>`backend/core/inspector.py`<br>`backend/tests/test_math.py` | Menjelaskan teori matematika RSA, bukti invers modular, penanganan overflow, serta demo tab *Crypto Inspector*. |
-| **ROLE 2** | **Security Protocol & FastAPI Specialist**<br>• Polynomial hash & chunking string $\leftrightarrow$ integer.<br>• Alur tanda tangan primer, counter-sign, & enkripsi asimetris memo.<br>• Registry anti-replay & Router REST API FastAPI. | `backend/core/hashing.py`<br>`backend/core/rsa_engine.py`<br>`backend/models/schemas.py`<br>`backend/routers/*.py`<br>`backend/main.py` | Menjelaskan protokol multi-entitas, mekanisme blocking/chunking, digital signature, anti-replay, dan struktur REST API. |
-| **ROLE 3** | **Frontend Next.js & Video/Report Lead**<br>• Desain UI Web Next.js (App Router, TypeScript).<br>• Integrasi CSF TanStack Query (`useMutation` & `useQuery`).<br>• 6 Halaman web & Interactive Attack Lab Suite.<br>• Sutradara video demo YouTube & kompilasi laporan Word. | `frontend/src/app/*`<br>`frontend/src/components/*`<br>`frontend/src/lib/api.ts`<br>`frontend/src/types/api.ts`<br>`data/samples/*` | Memimpin demo *running application*, alur normal (*Valid*), dan memperlihatkan kegagalan 4 serangan siber di Attack Lab. |
+| **ROLE 1** | **Rayka Dharma Pranandita (5027241039)**<br>• Algoritma prima, $\gcd$, EEA, Square-and-Multiply.<br>• Engine pencatat jejak matematika (`inspector.py`).<br>• Perhitungan manual angka modul kuliah ($p=47, q=71, e=79$). | `backend/core/primes.py`<br>`backend/core/math_utils.py`<br>`backend/core/inspector.py`<br>`backend/tests/test_math.py` | Menjelaskan teori matematika RSA, bukti invers modular, penanganan overflow, serta demo tab *Crypto Inspector*. |
+| **ROLE 2** | **Yuan Bany Albyan (5027241027)**<br>• Polynomial hash & chunking string $\leftrightarrow$ integer.<br>• Alur tanda tangan primer, counter-sign, & enkripsi asimetris memo.<br>• Registry anti-replay & Router REST API FastAPI. | `backend/core/hashing.py`<br>`backend/core/rsa_engine.py`<br>`backend/models/schemas.py`<br>`backend/routers/*.py`<br>`backend/main.py` | Menjelaskan protokol multi-entitas, mekanisme blocking/chunking, digital signature, anti-replay, dan struktur REST API. |
+| **ROLE 3** | **Evan Christian Nainggolan (5027241026)**<br>• Desain UI Web Next.js (App Router, TypeScript).<br>• Integrasi CSF TanStack Query (`useMutation` & `useQuery`).<br>• 6 Halaman web & Interactive Attack Lab Suite.<br>• Sutradara video demo YouTube & kompilasi laporan Word. | `frontend/src/app/*`<br>`frontend/src/components/*`<br>`frontend/src/lib/api.ts`<br>`frontend/src/types/api.ts`<br>`data/samples/*` | Memimpin demo *running application*, alur normal (*Valid*), dan memperlihatkan kegagalan 4 serangan siber di Attack Lab. |
 
 ---
 
@@ -145,7 +136,7 @@ Aplikasi web dapat dibuka di browser: **`http://localhost:3000`**.
 
 ---
 
-## 🎯 Luaran Akhir yang Dikumpulkan (Senin, 21 Oktober 2024 pukul 10.00 WIB)
+## 🎯 Luaran Akhir Program
 - [ ] **1. Source Code (.zip):** Seluruh kode program monorepo bersih (tanpa folder `.venv/` atau `node_modules/`).
 - [ ] **2. Dokumen Laporan (.docx):** Format laporan Word memuat latar belakang, dasar teori, hitungan manual $p=47, q=71, e=79$, screenshot pengujian TC-01 s/d TC-06, dan pembagian kerja tim.
 - [ ] **3. Tautan Video YouTube:** Video presentasi maksimal 15 menit dengan perkenalan wajib Nama & NRP setiap anggota tim di awal sesi.

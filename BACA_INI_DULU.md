@@ -2,6 +2,13 @@
 
 > **Dokumen Resmi Edukasi, Arsitektur & Pengujian Proyek**  
 > Lokasi file: Tepat di root proyek di samping `README.md`.  
+> Proyek: **Tugas Kriptografi — SecurePass RSA**
+
+### 👥 Anggota Kelompok:
+- **Evan Christian Nainggolan** — 5027241026
+- **Yuan Bany Albyan** — 5027241027
+- **Rayka Dharma Pranandita** — 5027241039
+
 > Dokumen ini disusun untuk menjelaskan secara menyeluruh:  
 > 1. **Apa tujuan bisnis dan arsitektur proyek ini?**  
 > 2. **Bukti bahwa algoritma kriptografi RSA 100% dibuat sendiri tanpa library eksternal (*0% Crypto Library / From Scratch*).**  
@@ -559,11 +566,11 @@ Seluruh endpoint backend disajikan melalui FastAPI (`http://localhost:8000`):
 2. **Durasi Video:** Maksimal 15 Menit. Resolusi minimal 1080p. Status video: *Public* atau *Unlisted*.
 
 ### Rekomendasi Pembagian Tugas & Skenario Video:
-- **00:00 - 02:00 (Semua Anggota):** Perkenalan Nama & NRP + Latar belakang masalah surat jalan di industri manufaktur.
-- **02:00 - 05:30 (Anggota 1):** Bedah kode matematika manual (`math_utils.py`, `primes.py`), buktikan 0% library kriptografi eksternal, dan demokan tab *Crypto Inspector* di browser.
-- **05:30 - 09:00 (Anggota 2):** Bedah kode hashing (`hashing.py`), chunking teks & blocking RSA (`rsa_engine.py`), perlihatkan dokumentasi Swagger API, dan jelaskan anti-replay nonce.
-- **09:00 - 13:00 (Anggota 3):** Demo live Happy Path di antarmuka web (Input manifes $\to$ Issue PPIC $\to$ Scan/Verify Satpam $\to$ Counter-sign Gerbang $\to$ Dual-Verify Gudang & Dekripsi memo rahasia).
-- **13:00 - 14:30 (Anggota 2 & 3):** Demo serangan siber di halaman *Attack Lab* (Payload Tampering & Replay Attack). Tunjukkan badge merah penolakan otomatis.
+- **00:00 - 02:00 (Semua Anggota):** Perkenalan Nama & NRP (Evan, Yuan, Rayka) + Latar belakang masalah surat jalan di industri manufaktur.
+- **02:00 - 05:30 (Rayka Dharma Pranandita):** Bedah kode matematika manual (`math_utils.py`, `primes.py`), buktikan 0% library kriptografi eksternal, dan demokan tab *Crypto Inspector* di browser.
+- **05:30 - 09:00 (Yuan Bany Albyan):** Bedah kode hashing (`hashing.py`), chunking teks & blocking RSA (`rsa_engine.py`), perlihatkan dokumentasi Swagger API, dan jelaskan anti-replay nonce.
+- **09:00 - 13:00 (Evan Christian Nainggolan):** Demo live Happy Path di antarmuka web (Input manifes $\to$ Issue PPIC $\to$ Scan/Verify Satpam $\to$ Counter-sign Gerbang $\to$ Dual-Verify Gudang & Dekripsi memo rahasia).
+- **13:00 - 14:30 (Yuan Bany Albyan & Evan Christian Nainggolan):** Demo serangan siber di halaman *Attack Lab* (Payload Tampering & Replay Attack). Tunjukkan badge merah penolakan otomatis.
 - **14:30 - 15:00 (Semua Anggota):** Kesimpulan keandalan RSA untuk integritas rantai pasok industri dan penutup.
 
 ---

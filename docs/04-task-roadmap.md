@@ -2,7 +2,11 @@
 ## Proyek: SecurePass RSA — Sistem Otorisasi & Verifikasi Surat Jalan Pabrik
 
 - **Dokumen Terkait**: [PRD](./02-prd-securepass-rsa.md) | [System Design & Architecture](./03-technical-design.md)
-- **Target Deadline**: 21 Oktober 2024, pukul 10.00 WIB
+- **Kategori**: Tugas Kriptografi
+- **Anggota Kelompok**:
+  - **Rayka Dharma Pranandita** — 5027241039 (Role 1: Math Engine & Inspector)
+  - **Yuan Bany Albyan** — 5027241027 (Role 2: Security Protocol & FastAPI Backend)
+  - **Evan Christian Nainggolan** — 5027241026 (Role 3: Frontend Next.js & TanStack Query Lead)
 - **Tech Stack**:
   - **Backend**: Python 3.11+, **FastAPI**, `uvicorn`, `pydantic` (0% Library Kriptografi Eksternal)
   - **Frontend**: **Next.js (App Router)**, **TypeScript**, **TanStack Query** (`@tanstack/react-query` untuk Client-Side Fetching / CSF & state caching), **Tailwind CSS**
@@ -10,55 +14,55 @@
 
 ## 1. Status Board & Ringkasan Task
 
-### Anggota 1: Math Engine & Inspector
+### ROLE 1 — Math Engine & Inspector Specialist: Rayka Dharma Pranandita (5027241039)
 | ID | Task | Assignee | Priority | Status | Est. Jam |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| `TASK-1.1` | Implementasi `is_prime()` Trial Division | Anggota 1 | 🔴 High | ☐ Todo | 2h |
-| `TASK-1.2` | Implementasi Miller-Rabin Primality Test `miller_rabin(n, k)` | Anggota 1 | 🔴 High | ☐ Todo | 4h |
-| `TASK-1.3` | Implementasi `generate_prime(bit_length)` Random Prime Generator | Anggota 1 | 🔴 High | ☐ Todo | 3h |
-| `TASK-1.4` | Implementasi `gcd(a, b)` Euclidean Algorithm | Anggota 1 | 🔴 High | ☐ Todo | 1h |
-| `TASK-1.5` | Implementasi `extended_euclidean(a, b)` (return gcd, x, y) | Anggota 1 | 🔴 High | ☐ Todo | 3h |
-| `TASK-1.6` | Implementasi `mod_inverse(e, phi_n)` via EEA | Anggota 1 | 🔴 High | ☐ Todo | 2h |
-| `TASK-1.7` | Implementasi `mod_exp(base, exp, mod)` Square-and-Multiply | Anggota 1 | 🔴 High | ☐ Todo | 3h |
-| `TASK-1.8` | Implementasi `keygen(bit_length, e_manual=None)` | Anggota 1 | 🔴 High | ☐ Todo | 3h |
-| `TASK-1.9` | Implementasi `inspector.py` (Trace Logger Miller-Rabin, EEA, ModExp) | Anggota 1 | 🟡 Med | ☐ Todo | 5h |
-| `TASK-1.10` | Unit Test Manual & Verifikasi Contoh Kuliah ($p=47, q=71, e=79$) | Anggota 1 | 🟡 Med | ☐ Todo | 2h |
+| `TASK-1.1` | Implementasi `is_prime()` Trial Division | Rayka | 🔴 High | ☐ Todo | 2h |
+| `TASK-1.2` | Implementasi Miller-Rabin Primality Test `miller_rabin(n, k)` | Rayka | 🔴 High | ☐ Todo | 4h |
+| `TASK-1.3` | Implementasi `generate_prime(bit_length)` Random Prime Generator | Rayka | 🔴 High | ☐ Todo | 3h |
+| `TASK-1.4` | Implementasi `gcd(a, b)` Euclidean Algorithm | Rayka | 🔴 High | ☐ Todo | 1h |
+| `TASK-1.5` | Implementasi `extended_euclidean(a, b)` (return gcd, x, y) | Rayka | 🔴 High | ☐ Todo | 3h |
+| `TASK-1.6` | Implementasi `mod_inverse(e, phi_n)` via EEA | Rayka | 🔴 High | ☐ Todo | 2h |
+| `TASK-1.7` | Implementasi `mod_exp(base, exp, mod)` Square-and-Multiply | Rayka | 🔴 High | ☐ Todo | 3h |
+| `TASK-1.8` | Implementasi `keygen(bit_length, e_manual=None)` | Rayka | 🔴 High | ☐ Todo | 3h |
+| `TASK-1.9` | Implementasi `inspector.py` (Trace Logger Miller-Rabin, EEA, ModExp) | Rayka | 🟡 Med | ☐ Todo | 5h |
+| `TASK-1.10` | Unit Test Manual & Verifikasi Contoh Kuliah ($p=47, q=71, e=79$) | Rayka | 🟡 Med | ☐ Todo | 2h |
 
-### 🔒 ROLE 2 — Security Protocol & FastAPI Backend Specialist (Anggota 2)
+### 🔒 ROLE 2 — Security Protocol & FastAPI Backend Specialist: Yuan Bany Albyan (5027241027)
 * **Fokus Utama**: Protokol keamanan data, hashing manual, blocking/chunking, digital signature, enkripsi payload, serialisasi token, anti-replay, serta pembuatan endpoint REST API **FastAPI**.
 * **File Kepemilikan**: `backend/core/hashing.py`, `backend/core/rsa_engine.py`, `backend/models/schemas.py`, `backend/routers/*.py`.
 
 | ID | Task | Assignee | Priority | Status | Est. Jam |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| `TASK-2.1` | Implementasi `custom_hash(data_str)` Polynomial Rolling Hash | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 3h |
-| `TASK-2.2` | Implementasi Chunking `text_to_blocks()` & `blocks_to_text()` | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 4h |
-| `TASK-2.3` | Implementasi `rsa_encrypt()` & `rsa_decrypt()` Core Engine | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 3h |
-| `TASK-2.4` | Implementasi `sign(manifest_str, priv_key_A)` Digital Signature | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 3h |
-| `TASK-2.5` | Implementasi `verify(manifest_str, signature_blocks, pub_key_A)` | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 3h |
-| `TASK-2.6` | Implementasi `counter_sign(clearance_str, priv_key_B)` Satpam | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 2h |
-| `TASK-2.7` | Implementasi `encrypt_payload()` & `decrypt_payload()` PrivKey/PubKey C | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 3h |
-| `TASK-2.8` | Implementasi `serialize_token(gate_pass_obj)` (JSON + Base64) | Role 2 (Anggota 2) | 🟡 Med | ☐ Todo | 2h |
-| `TASK-2.9` | Implementasi `deserialize_token(token_str)` (Base64 + JSON) | Role 2 (Anggota 2) | 🟡 Med | ☐ Todo | 2h |
-| `TASK-2.10` | Implementasi Anti-Replay Mechanism (Nonce Registry & Timestamp) | Role 2 (Anggota 2) | 🟡 Med | ☐ Todo | 2h |
-| `TASK-2.11` | Implementasi Pydantic Dataclass Model di `models/schemas.py` | Role 2 (Anggota 2) | 🟢 Low | ☐ Todo | 2h |
-| `TASK-2.12` | Implementasi REST API Routers FastAPI (`keygen`, `inspect`, `pass`, `attack`) | Role 2 (Anggota 2) | 🔴 High | ☐ Todo | 4h |
+| `TASK-2.1` | Implementasi `custom_hash(data_str)` Polynomial Rolling Hash | Yuan | 🔴 High | ☐ Todo | 3h |
+| `TASK-2.2` | Implementasi Chunking `text_to_blocks()` & `blocks_to_text()` | Yuan | 🔴 High | ☐ Todo | 4h |
+| `TASK-2.3` | Implementasi `rsa_encrypt()` & `rsa_decrypt()` Core Engine | Yuan | 🔴 High | ☐ Todo | 3h |
+| `TASK-2.4` | Implementasi `sign(manifest_str, priv_key_A)` Digital Signature | Yuan | 🔴 High | ☐ Todo | 3h |
+| `TASK-2.5` | Implementasi `verify(manifest_str, signature_blocks, pub_key_A)` | Yuan | 🔴 High | ☐ Todo | 3h |
+| `TASK-2.6` | Implementasi `counter_sign(clearance_str, priv_key_B)` Satpam | Yuan | 🔴 High | ☐ Todo | 2h |
+| `TASK-2.7` | Implementasi `encrypt_payload()` & `decrypt_payload()` PrivKey/PubKey C | Yuan | 🔴 High | ☐ Todo | 3h |
+| `TASK-2.8` | Implementasi `serialize_token(gate_pass_obj)` (JSON + Base64) | Yuan | 🟡 Med | ☐ Todo | 2h |
+| `TASK-2.9` | Implementasi `deserialize_token(token_str)` (Base64 + JSON) | Yuan | 🟡 Med | ☐ Todo | 2h |
+| `TASK-2.10` | Implementasi Anti-Replay Mechanism (Nonce Registry & Timestamp) | Yuan | 🟡 Med | ☐ Todo | 2h |
+| `TASK-2.11` | Implementasi Pydantic Dataclass Model di `models/schemas.py` | Yuan | 🟢 Low | ☐ Todo | 2h |
+| `TASK-2.12` | Implementasi REST API Routers FastAPI (`keygen`, `inspect`, `pass`, `attack`) | Yuan | 🔴 High | ☐ Todo | 4h |
 
-### 💻 ROLE 3 — Frontend Next.js (TypeScript) & TanStack Query Lead (Anggota 3)
+### 💻 ROLE 3 — Frontend Next.js (TypeScript) & TanStack Query Lead: Evan Christian Nainggolan (5027241026)
 * **Fokus Utama**: Seluruh tampilan antarmuka web modern menggunakan Next.js App Router, TypeScript, integrasi data via TanStack Query (CSF), interactive attack lab suite, rekaman video YouTube, dan perakitan laporan Word.
 * **File Kepemilikan**: `frontend/src/app/`, `frontend/src/components/`, `frontend/src/hooks/`, `frontend/src/lib/api.ts`.
 
 | ID | Task | Assignee | Priority | Status | Est. Jam |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| `TASK-3.1` | Setup Next.js App Router, QueryClientProvider, Layout & Navbar | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 3h |
-| `TASK-3.2` | `keygen/page.tsx`: UI 3 Entitas + TanStack Mutation Key Generation | Role 3 (Anggota 3) | 🟡 Med | ☐ Todo | 4h |
-| `TASK-3.3` | `inspector/page.tsx`: UI Crypto Debugger (EEA, ModExp, Miller-Rabin) | Role 3 (Anggota 3) | 🟡 Med | ☐ Todo | 5h |
-| `TASK-3.4` | `issue/page.tsx`: Form PPIC Manifest + TanStack Mutation Issue Pass | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 4h |
-| `TASK-3.5` | `gate/page.tsx`: Pos Satpam Gate Clearance + Counter-Signing Mutation | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 4h |
-| `TASK-3.6` | `receiving/page.tsx`: Dual Verify & Decrypt Secret Memo Mutation | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 4h |
-| `TASK-3.7` | `attack-lab/page.tsx`: 4 Interactive Cyber Attack Scenarios UI | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 5h |
-| `TASK-3.8` | Setup `src/lib/api.ts` Client Fetcher & TypeScript Interfaces | Role 3 (Anggota 3) | 🔴 High | ☐ Todo | 3h |
-| `TASK-3.9` | Audit Trail Real-time Log & LocalStorage Key Cache Synchronization | Role 3 (Anggota 3) | 🟢 Low | ☐ Todo | 2h |
-| `TASK-3.10` | Penyusunan Data Sample JSON di `data/samples/` | Role 3 (Anggota 3) | 🟢 Low | ☐ Todo | 1h |
+| `TASK-3.1` | Setup Next.js App Router, QueryClientProvider, Layout & Navbar | Evan | 🔴 High | ☐ Todo | 3h |
+| `TASK-3.2` | `keygen/page.tsx`: UI 3 Entitas + TanStack Mutation Key Generation | Evan | 🟡 Med | ☐ Todo | 4h |
+| `TASK-3.3` | `inspector/page.tsx`: UI Crypto Debugger (EEA, ModExp, Miller-Rabin) | Evan | 🟡 Med | ☐ Todo | 5h |
+| `TASK-3.4` | `issue/page.tsx`: Form PPIC Manifest + TanStack Mutation Issue Pass | Evan | 🔴 High | ☐ Todo | 4h |
+| `TASK-3.5` | `gate/page.tsx`: Pos Satpam Gate Clearance + Counter-Signing Mutation | Evan | 🔴 High | ☐ Todo | 4h |
+| `TASK-3.6` | `receiving/page.tsx`: Dual Verify & Decrypt Secret Memo Mutation | Evan | 🔴 High | ☐ Todo | 4h |
+| `TASK-3.7` | `attack-lab/page.tsx`: 4 Interactive Cyber Attack Scenarios UI | Evan | 🔴 High | ☐ Todo | 5h |
+| `TASK-3.8` | Setup `src/lib/api.ts` Client Fetcher & TypeScript Interfaces | Evan | 🔴 High | ☐ Todo | 3h |
+| `TASK-3.9` | Audit Trail Real-time Log & LocalStorage Key Cache Synchronization | Evan | 🟢 Low | ☐ Todo | 2h |
+| `TASK-3.10` | Penyusunan Data Sample JSON di `data/samples/` | Evan | 🟢 Low | ☐ Todo | 1h |
 ### Bersama (Semua Anggota)
 | ID | Task | Assignee | Priority | Status | Est. Jam |
 | :--- | :--- | :--- | :---: | :---: | :---: |

@@ -267,7 +267,10 @@ Alice mendekripsi cipherteks menggunakan kunci privat $(d = 1019, n = 3337)$:
 
    * **Wajib:** Sebelum presentasi dimulai, setiap anggota kelompok wajib memperkenalkan diri dengan menyebutkan **Nama** dan **NRP**.
 
-4. **Batas Pengumpulan:** Senin, 21 Oktober 2024 pukul 10.00 WIB melalui Google Classroom.
+### 6.4 Anggota Kelompok
+- **Rayka Dharma Pranandita** — 5027241039 (Math & Cryptographic Core)
+- **Yuan Bany Albyan** — 5027241027 (Security Protocol & FastAPI Backend)
+- **Evan Christian Nainggolan** — 5027241026 (Frontend Next.js & Integration Lead)
 
 ## 7. Referensi
 

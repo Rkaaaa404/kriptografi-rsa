@@ -5,16 +5,18 @@ description: "Guidelines and checklists for university assignment deliverables i
 
 # Academic Presentation & Report Guidelines: RSA Coursework
 
-Panduan penyusunan luaran tugas akhir mata kuliah Kriptografi (Semester 5) untuk proyek **SecurePass RSA**.
+Panduan penyusunan luaran tugas mata kuliah Kriptografi untuk proyek **SecurePass RSA**.
 
 ---
 
-## 1. Identitas & Tenggat Waktu Pengumpulan
+## 1. Identitas Proyek & Anggota Tim
 
-- **Mata Kuliah**: Kriptografi (Semester 5)
-- **Topik Proyek**: Implementasi Algoritma RSA (1 Studi Kasus Riil)
-- **Batas Waktu Pengumpulan**: **Senin, 21 Oktober 2024 pukul 10.00 WIB** melalui Google Classroom.
-- **Komposisi Tim**: 3 Orang Mahasiswa.
+- **Mata Kuliah**: Kriptografi
+- **Topik Proyek**: Implementasi Algoritma RSA (Studi Kasus Surat Jalan Pabrik - SecurePass RSA)
+- **Komposisi Tim**:
+  1. **Rayka Dharma Pranandita** — 5027241039 (Math & Cryptographic Core Specialist)
+  2. **Yuan Bany Albyan** — 5027241027 (Security Protocol & FastAPI Backend Specialist)
+  3. **Evan Christian Nainggolan** — 5027241026 (Frontend Next.js & Integration Lead)
 - **Bentuk Luaran Wajib**:
   1. Source Code Program (.zip)
   2. Dokumen Laporan Word (.docx)
@@ -34,10 +36,10 @@ Panduan penyusunan luaran tugas akhir mata kuliah Kriptografi (Semester 5) untuk
 | Waktu | Sesi & Topik | Pembicara | Hal yang Wajib Ditampilkan |
 | :---: | :--- | :--- | :--- |
 | **00:00 - 02:00** | **Pendahuluan & Perkenalan Diri** | Semua Anggota | • Perkenalan Nama & NRP masing-masing.<br>• Latar belakang studi kasus (masalah pemalsuan surat jalan di pabrik).<br>• Solusi kriptografi kunci-publik RSA multi-entitas. |
-| **02:00 - 05:30** | **Bedah Kode Matematika Manual** | Anggota 1 | • Penjelasan kode `primes.py` (Miller-Rabin & Trial Division).<br>• Penjelasan kode `math_utils.py` (Extended Euclidean & Square-and-Multiply).<br>• Bukti 0% library kriptografi eksternal.<br>• Demo tab *Crypto Inspector* (tabel EEA & bit-trace ModExp). |
-| **05:30 - 09:00** | **Bedah Protokol & REST API** | Anggota 2 | • Penjelasan kode `hashing.py` (Polynomial Rolling Hash dari nol).<br>• Penjelasan `rsa_engine.py` (blocking $m_i < n$, primary sign, counter-sign, payload encryption).<br>• Penjelasan FastAPI routers & model anti-replay nonce. |
-| **09:00 - 13:00** | **Demo Aplikasi Live (Happy Path)** | Anggota 3 | • Generate kunci 3 entitas (PPIC, Satpam, Gudang).<br>• Penerbitan surat jalan oleh PPIC (signing + enkripsi memo rahasia).<br>• Pemeriksaan pos gerbang satpam (status HIJAU) & approval clearance counter-sign.<br>• Konfirmasi gudang cabang & pembukaan catatan rahasia. |
-| **13:00 - 14:30** | **Demo Serangan Siber (Attack Lab)** | Anggota 3 & 2 | • Skenario 1: Manipulasi jumlah muatan (Status MERAH - Hash Mismatch).<br>• Skenario 2: Pemalsuan tanda tangan (Status MERAH - Rogue Signer).<br>• Skenario 3: Kerusakan signature (Status MERAH - Bit Corrupted).<br>• Skenario 4: Percobaan replay token bekas (Status DITOLAK - Nonce Reused). |
+| **02:00 - 05:30** | **Bedah Kode Matematika Manual** | Rayka Dharma Pranandita | • Penjelasan kode `primes.py` (Miller-Rabin & Trial Division).<br>• Penjelasan kode `math_utils.py` (Extended Euclidean & Square-and-Multiply).<br>• Bukti 0% library kriptografi eksternal.<br>• Demo tab *Crypto Inspector* (tabel EEA & bit-trace ModExp). |
+| **05:30 - 09:00** | **Bedah Protokol & REST API** | Yuan Bany Albyan | • Penjelasan kode `hashing.py` (Polynomial Rolling Hash dari nol).<br>• Penjelasan `rsa_engine.py` (blocking $m_i < n$, primary sign, counter-sign, payload encryption).<br>• Penjelasan FastAPI routers & model anti-replay nonce. |
+| **09:00 - 13:00** | **Demo Aplikasi Live (Happy Path)** | Evan Christian Nainggolan | • Generate kunci 3 entitas (PPIC, Satpam, Gudang).<br>• Penerbitan surat jalan oleh PPIC (signing + enkripsi memo rahasia).<br>• Pemeriksaan pos gerbang satpam (status HIJAU) & approval clearance counter-sign.<br>• Konfirmasi gudang cabang & pembukaan catatan rahasia. |
+| **13:00 - 14:30** | **Demo Serangan Siber (Attack Lab)** | Evan & Yuan | • Skenario 1: Manipulasi jumlah muatan (Status MERAH - Hash Mismatch).<br>• Skenario 2: Pemalsuan tanda tangan (Status MERAH - Rogue Signer).<br>• Skenario 3: Kerusakan signature (Status MERAH - Bit Corrupted).<br>• Skenario 4: Percobaan replay token bekas (Status DITOLAK - Nonce Reused). |
 | **14:30 - 15:00** | **Kesimpulan & Penutup** | Semua Anggota | • Kesimpulan keandalan RSA untuk integritas logistik.<br>• Evaluasi performa dan penutup. |
 
 ---
