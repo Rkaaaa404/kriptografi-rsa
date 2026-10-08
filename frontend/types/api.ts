@@ -95,6 +95,14 @@ export interface GateVerifyResponse {
   digest_recovered?: number | null;
 }
 
+export interface ClearanceRequest {
+  token_base64: string;
+  pub_key_a: [number, number];
+  priv_key_b: [number, number];
+  officer_id: string;
+  gate_id?: string;
+}
+
 export interface ClearanceResponse {
   updated_token_base64: string;
   clearance: GateClearance | Record<string, unknown>;
@@ -122,4 +130,32 @@ export interface VerifyResult {
   manifest?: ManifestHeader;
   is_replayed?: boolean;
   message: string;
+}
+
+export interface EncryptDecryptBlockTrace {
+  block_index: number;
+  raw_bytes_hex: string;
+  raw_bytes_int: number[];
+  m: number;
+  c: number;
+  decrypted_m?: number | null;
+  decrypted_bytes_hex?: string | null;
+}
+
+export interface EncryptDecryptTraceRequest {
+  text: string;
+  pub_key: [number, number];
+  priv_key?: [number, number];
+}
+
+export interface EncryptDecryptTraceResponse {
+  original_text: string;
+  original_bytes_hex: string;
+  original_bytes_length: number;
+  block_size_bytes: number;
+  modulus_bits: number;
+  blocks: EncryptDecryptBlockTrace[];
+  ciphertexts: number[];
+  decrypted_text?: string | null;
+  is_reversible?: boolean | null;
 }

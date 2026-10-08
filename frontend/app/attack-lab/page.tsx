@@ -108,7 +108,11 @@ function AttackLabContent() {
 
       const res = await api.simulateAttack(payload)
       setResult(res)
-      toast.error(`Serangan Berhasil Dideteksi & Digagalkan: ${res.status}`)
+      if (res.details?.is_signature_valid === true) {
+        toast.warning(`Hasil: Tanda tangan digital tetap valid (${res.status})`)
+      } else {
+        toast.error(`Serangan Berhasil Dideteksi & Digagalkan: ${res.status} (${res.error_code})`)
+      }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Gagal mengeksekusi simulasi')
     } finally {
@@ -371,46 +375,98 @@ function AttackLabContent() {
         </div>
 
         {/* Attack Diagnostic Result Card */}
-        {result && (
-          <div className="rounded-xl border border-rose-200 bg-rose-50/60 p-6 space-y-4 animate-in fade-in duration-150">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[11px] font-mono font-semibold">
-                  <XCircle className="w-3.5 h-3.5" /> STATUS: {result.status}
+        {result && (() => {
+          const isUndetected = result.details?.is_signature_valid === true
+          return (
+            <div
+              className={`rounded-xl border p-6 space-y-4 animate-in fade-in duration-150 ${
+                isUndetected
+                  ? 'border-amber-200 bg-amber-50/70'
+                  : 'border-rose-200 bg-rose-50/60'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold ${
+                      isUndetected
+                        ? 'bg-amber-100 text-amber-900'
+                        : 'bg-rose-100 text-rose-800'
+                    }`}
+                  >
+                    {isUndetected ? (
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                    ) : (
+                      <XCircle className="w-3.5 h-3.5" />
+                    )}{' '}
+                    STATUS: {result.status}
+                  </div>
+                  <h4
+                    className={`text-base font-bold ${
+                      isUndetected ? 'text-amber-950' : 'text-rose-950'
+                    }`}
+                  >
+                    {result.error_code}
+                  </h4>
+                  <p
+                    className={`text-xs ${
+                      isUndetected ? 'text-amber-900' : 'text-rose-900'
+                    }`}
+                  >
+                    {result.message}
+                  </p>
                 </div>
-                <h4 className="text-base font-bold text-rose-950">{result.error_code}</h4>
-                <p className="text-xs text-rose-900">{result.message}</p>
-              </div>
-            </div>
-
-            {/* Mathematical Proof Box */}
-            <div className="p-4 rounded-xl bg-white border border-rose-200/80 space-y-3 text-xs">
-              <div className="font-semibold text-zinc-900 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-rose-600" />
-                <span>Pembuktian Matematis Kegagalan (RSA Mathematical Verification)</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
-                <div className="p-2.5 rounded-lg bg-zinc-50 border border-zinc-100">
-                  <div className="text-zinc-500 text-[11px]">Hash Dokumen Dihitung: H(M′) mod n</div>
-                  <div className="font-bold text-zinc-900 mt-0.5">
-                    {String(result.details?.computed_digest ?? 'N/A')}
+              {/* Mathematical Proof Box */}
+              <div
+                className={`p-4 rounded-xl bg-white border space-y-3 text-xs ${
+                  isUndetected ? 'border-amber-200/80' : 'border-rose-200/80'
+                }`}
+              >
+                <div className="font-semibold text-zinc-900 flex items-center gap-1.5">
+                  <ShieldCheck
+                    className={`w-4 h-4 ${
+                      isUndetected ? 'text-amber-600' : 'text-rose-600'
+                    }`}
+                  />
+                  <span>
+                    {isUndetected
+                      ? 'Verifikasi Matematis RSA: Tanda Tangan Tetap Cocok'
+                      : 'Pembuktian Matematis Kegagalan (RSA Mathematical Verification)'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                  <div className="p-2.5 rounded-lg bg-zinc-50 border border-zinc-100">
+                    <div className="text-zinc-500 text-[11px]">Hash Dokumen Dihitung: H(M′) mod n</div>
+                    <div className="font-bold text-zinc-900 mt-0.5">
+                      {String(result.details?.computed_digest ?? 'N/A')}
+                    </div>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-zinc-50 border border-zinc-100">
+                    <div className="text-zinc-500 text-[11px]">Hash Dipulihkan dari Signature: S<sup>e</sup> mod n</div>
+                    <div
+                      className={`font-bold mt-0.5 ${
+                        isUndetected ? 'text-amber-700' : 'text-rose-700'
+                      }`}
+                    >
+                      {String(
+                        result.details?.recovered_digest_from_sig ??
+                          result.details?.recovered_digest ??
+                          'N/A'
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="p-2.5 rounded-lg bg-zinc-50 border border-zinc-100">
-                  <div className="text-zinc-500 text-[11px]">Hash Dipulihkan dari Signature: S<sup>e</sup> mod n</div>
-                  <div className="font-bold text-rose-700 mt-0.5">
-                    {String(result.details?.recovered_digest_from_sig ?? result.details?.recovered_digest ?? 'N/A')}
-                  </div>
-                </div>
-              </div>
 
-              <p className="text-zinc-600 text-[11px] leading-relaxed">
-                <strong>Analisis Sistem:</strong> {result.message}
-              </p>
+                <p className="text-zinc-600 text-[11px] leading-relaxed">
+                  <strong>Analisis Sistem:</strong> {result.message}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
       </div>
     </div>
   )

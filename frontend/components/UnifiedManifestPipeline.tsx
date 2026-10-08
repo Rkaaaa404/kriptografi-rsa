@@ -247,9 +247,16 @@ export function UnifiedManifestPipeline() {
         return
       }
 
+      if (!keyring.A?.pub_key) {
+        toast.error('Kunci Publik Entitas A (PPIC) tidak ditemukan!')
+        setIsClearingGate(false)
+        return
+      }
+
       // 2. Issue gate clearance & counter-sign
       const cRes = await api.gateClearance({
         token_base64: tokenBase64,
+        pub_key_a: keyring.A.pub_key,
         priv_key_b: keyring.B.priv_key,
         officer_id: officerId,
         gate_id: gateId,

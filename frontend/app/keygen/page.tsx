@@ -313,7 +313,7 @@ export default function KeygenPage() {
               >
                 <option value={16}>16 bits (Demo Cepat)</option>
                 <option value={32}>32 bits (Standar Tugas)</option>
-                <option value={64}>64 bits (Standard Security)</option>
+                <option value={48}>48 bits (Aman Presisi JS / MAX_SAFE_INTEGER)</option>
               </select>
             </div>
 

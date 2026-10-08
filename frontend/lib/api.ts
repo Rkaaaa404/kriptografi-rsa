@@ -1,6 +1,7 @@
 import type {
   Keypair, InspectTraceResponse, IssuePassResponse,
-  GateVerifyResponse, ClearanceResponse, ReceiveResponse, AttackResult
+  GateVerifyResponse, ClearanceResponse, ClearanceRequest, ReceiveResponse,
+  AttackResult, EncryptDecryptTraceRequest, EncryptDecryptTraceResponse,
 } from '@/types/api'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
@@ -27,7 +28,9 @@ export const api = {
     post<InspectTraceResponse>('/api/v1/inspect/trace', body),
   issuePass: (body: object) => post<IssuePassResponse>('/api/v1/pass/issue', body),
   gateVerify: (body: object) => post<GateVerifyResponse>('/api/v1/pass/gate-verify', body),
-  gateClearance: (body: object) => post<ClearanceResponse>('/api/v1/pass/gate-clearance', body),
+  gateClearance: (body: ClearanceRequest | object) => post<ClearanceResponse>('/api/v1/pass/gate-clearance', body),
   receivePass: (body: object) => post<ReceiveResponse>('/api/v1/pass/receive', body),
   simulateAttack: (body: object) => post<AttackResult>('/api/v1/attack/simulate', body),
+  inspectEncryptDecrypt: (body: EncryptDecryptTraceRequest) =>
+    post<EncryptDecryptTraceResponse>('/api/v1/inspect/encrypt-decrypt', body),
 }
